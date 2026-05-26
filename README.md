@@ -2,7 +2,7 @@
 
 > A free, open library of AI-powered K-12 lesson plans — bilingual, classroom-tested, and built by educators for educators.
 
-[![Lessons](https://img.shields.io/badge/lessons-5%20and%20growing-brightgreen)](./lessons)
+[![Lessons](https://img.shields.io/badge/lessons-6%20and%20growing-brightgreen)](./lessons)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-orange)](./CONTRIBUTING.md)
 [![Bilingual](https://img.shields.io/badge/language-English%20%2F%20Espanol-red)](./lessons)
@@ -32,6 +32,7 @@ No GitHub experience required. If you can edit a text file, you can contribute.
 | [Arguing with AI: Climate Evidence Debate](./lessons/science-6-8-arguing-with-ai-climate-debate.md) — students fact-check AI climate claims | 6-8 | Science | English |
 | [Who Wrote This? AI, Authorship, and Your Voice](./lessons/sel-9-12-who-wrote-this-ai-authorship.md) — reflect on AI and creative voice | 9-12 | SEL / Digital Citizenship | English |
 | [El Jardin de Numeros / The Number Garden](./lessons/math-k3-el-jardin-de-numeros-bilingual.md) — counting and number sense with AI | K-3 | Math | Bilingual |
+| [The Scribe Who Forgot His Dreams](./lessons/cs-k12-the-scribe-who-forgot-his-dreams.md) — how AI can help warmly without remembering you (story, no devices required) | K-12 | CS / AI Literacy | English |
 
 [See all lessons](./lessons)
 
