@@ -32,9 +32,19 @@ No GitHub experience required. If you can edit a text file, you can contribute.
 | [Arguing with AI: Climate Evidence Debate](./lessons/science-6-8-arguing-with-ai-climate-debate.md) — students fact-check AI climate claims | 6-8 | Science | English |
 | [Who Wrote This? AI, Authorship, and Your Voice](./lessons/sel-9-12-who-wrote-this-ai-authorship.md) — reflect on AI and creative voice | 9-12 | SEL / Digital Citizenship | English |
 | [El Jardin de Numeros / The Number Garden](./lessons/math-k3-el-jardin-de-numeros-bilingual.md) — counting and number sense with AI | K-3 | Math | Bilingual |
-| [The Scribe Who Forgot His Dreams](./lessons/cs-k12-the-scribe-who-forgot-his-dreams.md) — how AI can help warmly without remembering you (story, no devices required) | K-12 | CS / AI Literacy | English |
+| [The Scribe Who Forgot His Dreams](./lessons/cs-k12-the-scribe-who-forgot-his-dreams.md) — how AI can help warmly without remembering you (story; no devices required) | K-12 | CS / AI Literacy | English |
 
 [See all lessons](./lessons)
+
+---
+
+## Example submissions
+
+Draft lesson packs posted for community review (not yet piloted through Emerging Rule):
+
+| Showcase | Description |
+|----------|-------------|
+| [AI Literacy 9–12 (6-unit arc)](./showcases/ai-literacy-9-12/) | HS series + [Scribe](./lessons/cs-k12-the-scribe-who-forgot-his-dreams.md) companion · [Issue #5](https://github.com/Emerging-Rule/community/issues/5) |
 
 ---
 
@@ -51,9 +61,9 @@ Send your lesson to admin@emergingrule.com with subject `[Community Lesson]`.
 We will add it and credit you as contributor.
 
 ### What we need most right now
+- **CS / how AI works (Issue #5)** — proposed: [The Scribe Who Forgot His Dreams](./lessons/cs-k12-the-scribe-who-forgot-his-dreams.md) · [presentation brief](./research/emerging-rule-presentation-scribe-lesson.md)
 - Science lesson for grades 3-5
 - Social Studies or History lesson for middle school
-- Computer Science or coding lesson (any grade)
 - Spanish-only version of El Jardin de Numeros
 - AI and Education reading list for teachers
 
