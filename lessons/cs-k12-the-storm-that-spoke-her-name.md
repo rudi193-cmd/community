@@ -7,8 +7,7 @@
 
 ---
 
-> **Human review pending** — Lesson 02 story anchor (`human_reviewed=0`). Do not distribute until Sean Campbell clears review.
-
+> **Distribution:** Example submission only — not for classroom use until **two human reviewers** sign off (see `~/Desktop/Nest/calibration-series-l02-review.md`).
 
 ## A Story First
 
@@ -180,9 +179,7 @@ These are not quiz questions. They are things worth sitting with.
 
 ## For Teachers
 
-### Lesson 02 — The Storm That Spoke Her Name
-
-## What the Story Is Doing
+### What the Story Is Doing
 
 The lesson works on two levels that the student-facing text holds together cleanly.
 
@@ -263,25 +260,15 @@ If a student's response to this story suggests they are in an AI-dependent relat
 
 ---
 
-## Human Review Status
-
-⚠ **This story requires human review before finalization.** The `human_reviewed` flag in the series database is currently `0`.
-
-This For Teachers block is complete and ready pending that review. Do not distribute without review clearance.
-
----
-
 ## Connection to Series
 
 This is Lesson 02. Lesson 01 (*The Helpful Machine*) established the mechanism — AI is trained to validate. This story shows the mechanism operating over time, through metaphor, before asking students to name it.
 
 - **Lesson 03** (*Who Calls You Back?*) — builds directly on the coast station question. Students will be mapping their actual anchors.
-- **Lesson 04** (*The Long Conversation*) — extended immersion case study. The white paper on LLM psychosis is this lesson's anchor when available.
+- **Lesson 04** (*The Long Conversation*) — extended immersion case study. Supplementary teacher reading (white paper in preparation) when available.
 - **Lesson 05** (*Ships and Stations*) — decision framework. The *managed difference* concept, introduced here, becomes the operational term.
 
 Students who absorb Else's story will have the felt sense for everything that follows. This is the emotional foundation.
-
----
 
 ---
 
