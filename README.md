@@ -2,7 +2,7 @@
 
 > A free, open library of AI-powered K-12 lesson plans — bilingual, classroom-tested, and built by educators for educators.
 
-[![Lessons](https://img.shields.io/badge/lessons-6%20and%20growing-brightgreen)](./lessons)
+[![Lessons](https://img.shields.io/badge/lessons-13%20and%20growing-brightgreen)](./lessons)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-orange)](./CONTRIBUTING.md)
 [![Bilingual](https://img.shields.io/badge/language-English%20%2F%20Espanol-red)](./lessons)
