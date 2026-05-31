@@ -39,6 +39,8 @@ Students will understand — through story, not jargon — that many AI systems 
 
 **Co-authorship:** Story developed by Sean Campbell with Hanz Christain Anderthon (Professor of Computational Kindness, UTETY). AI tools assisted drafting; **human direction and edit are authoritative.**
 
+**Planning / presentation thread:** [`research/emerging-rule-scribe-talkthrough.md`](../research/emerging-rule-scribe-talkthrough.md) · [`research/emerging-rule-presentation-scribe-lesson.md`](../research/emerging-rule-presentation-scribe-lesson.md)
+
 ---
 
 ## The Story
@@ -181,6 +183,62 @@ He was sure of that also.
 *Professor of Computational Kindness*
 
 🍊
+
+---
+
+## Assessment
+
+This lesson assesses **understanding through discussion and expression**, not a written test.
+
+**Evidence you might document:**
+
+- **Verbal (K–12):** Student explains in their own words that the scribe can be helpful *and* not remember prior visits — without using jargon.
+- **Reflective (3–12):** Student names which visitor response they relate to (stopped / came more / adjusted) and gives a reason.
+- **Visual (K–5):** Drawing of what stayed vs. what dissolved overnight (knowledge vs. the day's visitors).
+- **Optional tech (6–12):** Student describes what felt the same and what was missing after two fresh chat sessions with the same question.
+
+**Sample report-card language:**
+
+- *The student articulated understanding after reflection, indicating durable sense-making.*
+- *The student demonstrated conceptual transfer by connecting ideas* (e.g., scribe ↔ chat tool they have used).
+
+Holistic participation is sufficient. There is no single correct moral; the goal is **accurate notice** of how the system behaves.
+
+---
+
+## Differentiation
+
+### K–2
+- Teacher reads aloud; pause after the woman and the boy.
+- Draw: *What did the scribe know? What did he forget?*
+- One question: *Was the scribe mean?* (Expected: no — he is made this way.)
+
+### 3–5
+- Read aloud or paired reading.
+- Discuss the three visitor types at the end.
+- Write one sentence: *Would you still visit the scribe? Why?*
+
+### 6–8
+- Students read silently or in pairs.
+- Socratic discussion on memory, trust, and privacy.
+- Optional: fresh-chat demo (teacher-led first).
+
+### 9–12
+- Full discussion prompts; connect to tools students already use.
+- Extension: *Sequence, not duration* — the gap between turns is not experienced by the system as waiting (see `research/notes-for-future-lessons.md`).
+- Optional writing: personal rule for when stateless help is useful vs. when you need a human who remembers context.
+
+### ELL / multilingual
+- Story is read-aloud friendly; allow home-language discussion before English exit ticket if your school policy allows.
+- Key concept to translate carefully: *remember the conversation* vs. *know the topic*.
+
+### Support
+- Provide illustrated storyboard of four beats: help → sleep → forget → return.
+- Pre-teach: *stateless* is not required; use *does not keep your story overnight*.
+
+### Extension
+- Students write a fourth visitor with a different response to discovering the scribe forgets.
+- Compare: when is forgetting a feature (privacy) vs. a problem (medical follow-up)?
 
 ---
 
