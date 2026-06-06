@@ -45,6 +45,8 @@ Draft lesson packs posted for community review (not yet piloted through Emerging
 | Showcase | Description |
 |----------|-------------|
 | [AI Literacy 9–12 (6-unit arc)](./showcases/ai-literacy-9-12/) | HS series + [Scribe](./lessons/cs-k12-the-scribe-who-forgot-his-dreams.md) companion · [Issue #5](https://github.com/Emerging-Rule/community/issues/5) |
+| [Calibration Series (6–10)](./showcases/ai-calibration-6-10/) | AI literacy arc · L02 review gate |
+| [Calibration Series — Social Studies (6–8)](./showcases/socialstudies-6-8/) | History lens on the Else/lighthouse arc · from Nest `files(1).zip` |
 
 ---
 
