@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buttons and Interaction — CS 5–7</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f7f4;
+    --surface: #ffffff;
+    --accent: #7b1fa2;
+    --accent2: #e91e63;
+    --text: #2d2d2d;
+    --muted: #777;
+    --border: #e8e4de;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--accent);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  .grade-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .site-header h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .site-header p {
+    opacity: 0.88;
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Nav tabs ── */
+  .tab-bar {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.9rem 1rem;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-btn.locked {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+
+  /* ── Sections ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  /* ── Lesson content ── */
+  .lesson-content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  .lesson-content h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2rem 0 0.6rem;
+    color: var(--accent);
+  }
+  .lesson-content h2:first-child { margin-top: 0; }
+  .lesson-content p { margin-bottom: 1rem; }
+  .lesson-content ul {
+    margin: 0.5rem 0 1rem 1.4rem;
+  }
+  .lesson-content li { margin-bottom: 0.4rem; }
+
+  .callout {
+    background: #f3e5f5;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.2rem;
+    margin: 1.25rem 0;
+  }
+  .callout strong { color: var(--accent); }
+
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .code-block .kw  { color: #cba6f7; }
+  .code-block .str { color: #a6e3a1; }
+  .code-block .num { color: #fab387; }
+  .code-block .cmt { color: #6c7086; }
+  .code-block .fn  { color: #89dceb; }
+
+  .big-question {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Sandbox ── */
+  .sandbox {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .sandbox { grid-template-columns: auto 1fr; }
+  }
+
+  .sandbox-stage {
+    background: #1a1a2e;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  canvas {
+    display: block;
+    border-radius: 8px;
+    background: #16213e;
+  }
+  .stat-bars {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.75);
+  }
+  .stat-label { width: 52px; flex-shrink: 0; }
+  .stat-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.35s ease;
+  }
+  .stat-fill.food   { background: #a6e3a1; }
+  .stat-fill.happy  { background: #f9e2af; }
+  .stat-fill.energy { background: #89b4fa; }
+  .stat-pct {
+    width: 30px;
+    text-align: right;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    flex-shrink: 0;
+  }
+
+  .action-btns {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 0.55rem 0.4rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+  .action-btn:active { transform: scale(0.93); }
+  .btn-feed  { background: #a6e3a1; color: #1a2e1a; }
+  .btn-play  { background: #f9e2af; color: #2e2a1a; }
+  .btn-rest  { background: #89b4fa; color: #1a1e2e; }
+
+  /* ── Builder panel ── */
+  .builder-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    min-width: 0;
+  }
+  .builder-panel h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .control-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .control-group select,
+  .control-group input[type="text"] {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .control-group select:focus,
+  .control-group input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    width: 26px;
+    text-align: right;
+  }
+
+  .direction-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .dir-btn {
+    flex: 1;
+    padding: 0.45rem 0.5rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+  }
+  .dir-btn.selected {
+    border-color: var(--accent);
+    background: #f3e5f5;
+    color: var(--accent);
+  }
+
+  .custom-preview-btn {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 0.25rem;
+  }
+  .custom-preview-btn:hover { background: #6a1b9a; }
+  .custom-preview-btn:active { transform: scale(0.97); }
+
+  .emoji-map {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .emoji-chip {
+    font-size: 1.3rem;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    transition: border-color 0.1s, background 0.1s;
+    user-select: none;
+  }
+  .emoji-chip:hover { border-color: var(--accent); background: #f0eeff; }
+  .emoji-chip.selected { border-color: var(--accent); background: #e8e4ff; }
+
+  .code-peek-inline {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin-top: 0.25rem;
+  }
+  .code-peek-inline .kw  { color: #cba6f7; }
+  .code-peek-inline .str { color: #a6e3a1; }
+  .code-peek-inline .num { color: #fab387; }
+  .code-peek-inline .fn  { color: #89dceb; }
+
+  /* ── Code peek (bottom) ── */
+  .code-peek-section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2.5rem;
+  }
+  .peek-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+    margin-bottom: 0.75rem;
+  }
+  .peek-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .peek-toggle .arrow { transition: transform 0.2s; margin-left: auto; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; }
+  #code-peek-box.open { display: block; }
+
+  /* ── Footer ── */
+  .lesson-footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+  .lesson-footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Ready button ── */
+  .ready-btn {
+    display: block;
+    width: 100%;
+    margin-top: 2.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .ready-btn:hover { background: #6a1b9a; }
+  .ready-btn:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="grade-tag">Grades 5–7 · Computer Science · 45–60 min</div>
+  <h1>Buttons and Interaction</h1>
+  <p>How do you make a program do something when you click?</p>
+</header>
+
+<nav class="tab-bar" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept', this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-sandbox" onclick="switchTab('sandbox', this)" role="tab">Part 2 — Build It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="big-question">How do you make a program do something when you click?</p>
+    <p>Every button on every website follows the same basic idea: you click, something runs, something changes. Once you understand that pattern, you can wire up almost anything.</p>
+
+    <h2>The HTML button</h2>
+    <p>A button in HTML looks like this:</p>
+
+    <div class="code-block">
+&lt;button <span class="kw">onclick</span>=<span class="str">"feed()"</span>&gt;🍎 Feed&lt;/button&gt;
+    </div>
+
+    <p>The <code>onclick</code> attribute tells the browser: "when this button is clicked, call the function named <code>feed</code>." That's it. The button doesn't do anything on its own — it just hands control over to your JavaScript.</p>
+
+    <h2>The function that runs</h2>
+    <p>When the button is clicked, this function runs:</p>
+
+    <div class="code-block">
+<span class="kw">function</span> <span class="fn">feed</span>() {<br>
+&nbsp;&nbsp;food  = Math.<span class="fn">min</span>(<span class="num">100</span>, food + <span class="num">20</span>);  <span class="cmt">// add 20, but never go above 100</span><br>
+&nbsp;&nbsp;happy = Math.<span class="fn">min</span>(<span class="num">100</span>, happy + <span class="num">5</span>);   <span class="cmt">// feeding makes them a little happy too</span><br>
+&nbsp;&nbsp;<span class="fn">updateDisplay</span>();                    <span class="cmt">// show the new numbers</span><br>
+}
+    </div>
+
+    <h2>Why <code>Math.min(100, food + 20)</code>?</h2>
+    <p>Without the cap, clicking Feed ten times would push food to 280 — which doesn't mean anything. <code>Math.min(100, food + 20)</code> says: "take whichever is smaller — 100, or food + 20." The result can never exceed 100.</p>
+    <p>Same idea for the other direction: <code>Math.max(0, energy - 10)</code> means energy can never go below zero.</p>
+
+    <div class="callout">
+      <strong>Every button follows the same pattern:</strong> onclick calls a function, the function changes a variable, the function updates the display. Three steps, every time.
+    </div>
+
+    <h2>Multi-stat actions</h2>
+    <p>Playing is more interesting than feeding, because it changes two things at once — and they go in opposite directions:</p>
+
+    <div class="code-block">
+<span class="kw">function</span> <span class="fn">play</span>() {<br>
+&nbsp;&nbsp;happy  = Math.<span class="fn">min</span>(<span class="num">100</span>, happy + <span class="num">15</span>);  <span class="cmt">// playing feels good</span><br>
+&nbsp;&nbsp;energy = Math.<span class="fn">max</span>(<span class="num">0</span>,   energy - <span class="num">10</span>); <span class="cmt">// but it costs energy</span><br>
+&nbsp;&nbsp;<span class="fn">updateDisplay</span>();<br>
+}
+    </div>
+
+    <div class="callout">
+      <strong>Playing costs energy.</strong> Actions that affect multiple stats make your pet feel like a real system — things connect. You can't just spam Play forever, because eventually your creature runs out of energy.
+    </div>
+
+    <h2>Making the creature react visually</h2>
+    <p>Changing a number is invisible. You need the drawing code to look at the numbers and respond:</p>
+
+    <div class="code-block">
+<span class="cmt">// In the draw loop, check happy every frame:</span><br>
+<span class="kw">if</span> (happy &gt; <span class="num">80</span>) {<br>
+&nbsp;&nbsp;<span class="cmt">// make the creature bounce</span><br>
+&nbsp;&nbsp;bounceY = Math.<span class="fn">abs</span>(Math.<span class="fn">sin</span>(t * <span class="num">3</span>)) * -<span class="num">12</span>;<br>
+} <span class="kw">else</span> {<br>
+&nbsp;&nbsp;bounceY = <span class="num">0</span>;<br>
+}
+    </div>
+
+    <p>That <code>if</code> block lives inside the animation loop — it runs 60 times per second. So the moment <code>happy</code> crosses 80, the bounce starts. The moment it drops below 80, the bounce stops. The state drives the visuals automatically.</p>
+
+    <p>You can do the same for droopy eyes when a stat is low:</p>
+
+    <div class="code-block">
+<span class="kw">if</span> (food &lt; <span class="num">20</span> || energy &lt; <span class="num">20</span> || happy &lt; <span class="num">20</span>) {<br>
+&nbsp;&nbsp;<span class="cmt">// draw half-closed eyes instead of normal eyes</span><br>
+&nbsp;&nbsp;eyeH = <span class="num">3</span>;  <span class="cmt">// squish the eye height</span><br>
+} <span class="kw">else</span> {<br>
+&nbsp;&nbsp;eyeH = <span class="num">10</span>; <span class="cmt">// normal open eyes</span><br>
+}
+    </div>
+
+    <p>Now your buttons don't just change numbers — they change how the creature looks. That's what makes a program feel alive.</p>
+
+    <button class="ready-btn" onclick="unlockSandbox()">Show me — go to Part 2 →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-sandbox" class="tab-section">
+
+  <div class="sandbox">
+
+    <!-- Stage -->
+    <div class="sandbox-stage">
+      <canvas id="c" width="280" height="200"></canvas>
+
+      <div class="stat-bars">
+        <div class="stat-row">
+          <span class="stat-label">Food</span>
+          <div class="stat-track"><div class="stat-fill food" id="bar-food" style="width:70%"></div></div>
+          <span class="stat-pct" id="pct-food">70%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Happy</span>
+          <div class="stat-track"><div class="stat-fill happy" id="bar-happy" style="width:65%"></div></div>
+          <span class="stat-pct" id="pct-happy">65%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Energy</span>
+          <div class="stat-track"><div class="stat-fill energy" id="bar-energy" style="width:80%"></div></div>
+          <span class="stat-pct" id="pct-energy">80%</span>
+        </div>
+      </div>
+
+      <div class="action-btns">
+        <button class="action-btn btn-feed" onclick="feed()">🍎 Feed</button>
+        <button class="action-btn btn-play" onclick="play()">✨ Play</button>
+        <button class="action-btn btn-rest" onclick="rest()">💤 Rest</button>
+      </div>
+    </div>
+
+    <!-- Builder panel -->
+    <div class="builder-panel">
+      <h3>Build your own button</h3>
+
+      <div class="control-group">
+        <label>Stat to change</label>
+        <select id="ctrl-stat" onchange="updateCustomPreview()">
+          <option value="food">Food</option>
+          <option value="happy">Happy</option>
+          <option value="energy">Energy</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Direction</label>
+        <div class="direction-row">
+          <button class="dir-btn selected" id="dir-add" onclick="setDir('add')">+ Add</button>
+          <button class="dir-btn" id="dir-sub" onclick="setDir('sub')">− Subtract</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Amount <span class="slider-val" id="val-amount">15</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-amount" min="5" max="30" value="15" oninput="document.getElementById('val-amount').textContent=this.value; updateCustomPreview()">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Button emoji</label>
+        <div class="emoji-map" id="emoji-map"></div>
+        <input type="text" id="ctrl-emoji" value="⭐" maxlength="4" placeholder="⭐" oninput="updateCustomPreview()" style="margin-top:6px;">
+      </div>
+
+      <button class="custom-preview-btn" id="custom-btn" onclick="doCustomAction()">⭐ My Button</button>
+
+      <div class="code-peek-inline" id="custom-code-box">
+        <span class="cmt">// your button's code will appear here</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Code peek -->
+  <div class="code-peek-section">
+    <button class="peek-toggle" id="peek-btn" onclick="togglePeek()">
+      <span>🔮 Peek at the code — feed(), play(), rest()</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div id="code-peek-box">
+      <div class="code-block">
+<span class="kw">function</span> <span class="fn">feed</span>() {<br>
+&nbsp;&nbsp;food  = Math.<span class="fn">min</span>(<span class="num">100</span>, food + <span class="num">20</span>);<br>
+&nbsp;&nbsp;happy = Math.<span class="fn">min</span>(<span class="num">100</span>, happy + <span class="num">5</span>);<br>
+&nbsp;&nbsp;<span class="fn">spawnParticles</span>(<span class="str">'🍎'</span>, <span class="num">3</span>);<br>
+&nbsp;&nbsp;<span class="fn">updateBars</span>();<br>
+}<br>
+<br>
+<span class="kw">function</span> <span class="fn">play</span>() {<br>
+&nbsp;&nbsp;happy  = Math.<span class="fn">min</span>(<span class="num">100</span>, happy + <span class="num">15</span>);<br>
+&nbsp;&nbsp;energy = Math.<span class="fn">max</span>(<span class="num">0</span>,   energy - <span class="num">10</span>);<br>
+&nbsp;&nbsp;<span class="fn">spawnParticles</span>(<span class="str">'✨'</span>, <span class="num">4</span>);<br>
+&nbsp;&nbsp;<span class="fn">updateBars</span>();<br>
+}<br>
+<br>
+<span class="kw">function</span> <span class="fn">rest</span>() {<br>
+&nbsp;&nbsp;energy = Math.<span class="fn">min</span>(<span class="num">100</span>, energy + <span class="num">25</span>);<br>
+&nbsp;&nbsp;<span class="fn">updateBars</span>();<br>
+}<br>
+<br>
+<span class="cmt">// In the draw loop:</span><br>
+<span class="kw">if</span> (happy &gt; <span class="num">75</span>) {<br>
+&nbsp;&nbsp;bounceY = Math.<span class="fn">abs</span>(Math.<span class="fn">sin</span>(t * <span class="num">3</span>)) * -<span class="num">12</span>;<br>
+}<br>
+<span class="kw">if</span> (food &lt; <span class="num">20</span> || energy &lt; <span class="num">20</span> || happy &lt; <span class="num">20</span>) {<br>
+&nbsp;&nbsp;eyeH = <span class="num">3</span>; <span class="cmt">// droopy</span><br>
+}
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="lesson-footer">
+  Buttons and Interaction · Grades 5–7 · Computer Science ·
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ── Emoji map ─────────────────────────────────────────────────────
+var EMOJIS = [
+  '⭐','🍎','🍕','🍩','🎂','🍓','🥕','🌮',
+  '✨','💛','💜','❤️','💚','💙','🧡','🤍',
+  '💤','💫','🎵','🎉','🎈','🎁','🌈','☀️',
+  '🐾','🐟','🦋','🌸','🍄','🌙','⚡','🔥',
+  '😊','😴','🥺','😎','🤩','🥳','😋','🤔',
+];
+(function buildEmojiMap() {
+  var map = document.getElementById('emoji-map');
+  EMOJIS.forEach(function(em) {
+    var chip = document.createElement('button');
+    chip.className = 'emoji-chip';
+    chip.textContent = em;
+    chip.title = em;
+    chip.type = 'button';
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.emoji-chip').forEach(function(c) { c.classList.remove('selected'); });
+      chip.classList.add('selected');
+      document.getElementById('ctrl-emoji').value = em;
+      updateCustomPreview();
+    });
+    map.appendChild(chip);
+  });
+  // mark default selected
+  map.firstChild.classList.add('selected');
+})();
+
+// ── State ──────────────────────────────────────────────────────────
+var food   = 70;
+var happy  = 65;
+var energy = 80;
+
+// animation state
+var t        = 0;
+var particles = [];   // {x, y, emoji, life, vy, vx}
+var restWag  = 0;     // wag phase (used during rest)
+var isResting = false;
+var restTimer = 0;
+var customDir = 'add';
+
+// ── Canvas ────────────────────────────────────────────────────────
+var canvas = document.getElementById('c');
+var ctx    = canvas.getContext('2d');
+var W = canvas.width, H = canvas.height;
+
+// ── Stat bar update ───────────────────────────────────────────────
+function updateBars() {
+  document.getElementById('bar-food').style.width   = food   + '%';
+  document.getElementById('bar-happy').style.width  = happy  + '%';
+  document.getElementById('bar-energy').style.width = energy + '%';
+  document.getElementById('pct-food').textContent   = Math.round(food)   + '%';
+  document.getElementById('pct-happy').textContent  = Math.round(happy)  + '%';
+  document.getElementById('pct-energy').textContent = Math.round(energy) + '%';
+}
+
+// ── Action functions ──────────────────────────────────────────────
+function feed() {
+  food  = Math.min(100, food  + 20);
+  happy = Math.min(100, happy + 5);
+  spawnParticles('🍎', 3);
+  isResting = false;
+  updateBars();
+}
+
+function play() {
+  happy  = Math.min(100, happy  + 15);
+  energy = Math.max(0,   energy - 10);
+  spawnParticles('✨', 4);
+  isResting = false;
+  updateBars();
+}
+
+function rest() {
+  energy = Math.min(100, energy + 25);
+  isResting = true;
+  restTimer = 120; // frames
+  updateBars();
+}
+
+// ── Particles ─────────────────────────────────────────────────────
+function spawnParticles(emoji, n) {
+  for (var i = 0; i < n; i++) {
+    particles.push({
+      x:     W / 2 + (Math.random() - 0.5) * 70,
+      y:     H / 2 - 10 + (Math.random() - 0.5) * 30,
+      emoji: emoji,
+      life:  1.0,
+      vy:    -(1.2 + Math.random() * 1.2),
+      vx:    (Math.random() - 0.5) * 1.0,
+    });
+  }
+}
+
+// ── Slow drain ────────────────────────────────────────────────────
+setInterval(function() {
+  food   = Math.max(0, food   - 4);
+  happy  = Math.max(0, happy  - 3);
+  energy = Math.max(0, energy - 2);
+  updateBars();
+}, 8000);
+
+// ── Drawing ───────────────────────────────────────────────────────
+function draw() {
+  t += 0.04;
+  ctx.clearRect(0, 0, W, H);
+
+  var isSad    = food < 20 || happy < 20 || energy < 20;
+  var isHappy  = happy > 75;
+  var isTired  = energy < 20;
+
+  // bounce when happy
+  var bounceY = 0;
+  if (isHappy) {
+    bounceY = Math.abs(Math.sin(t * 3)) * -12;
+  }
+
+  // wag offset when resting
+  var wagX = 0;
+  if (isResting && restTimer > 0) {
+    restTimer--;
+    wagX = Math.sin(t * 6) * 4;
+    if (restTimer === 0) isResting = false;
+  }
+
+  var cx = W / 2 + wagX;
+  var cy = H / 2 + 10 + bounceY;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // body blob
+  var wobble = Math.sin(t * 1.4) * 2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 52 + wobble, 58 - wobble * 0.5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#7b1fa2';
+  ctx.fill();
+
+  // sheen
+  ctx.beginPath();
+  ctx.ellipse(-12, -14, 17, 13, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  ctx.fill();
+
+  // cheeks when sad
+  if (isSad) {
+    [[-22, 10], [22, 10]].forEach(function(pt) {
+      ctx.beginPath();
+      ctx.ellipse(pt[0], pt[1], 11, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.13)';
+      ctx.fill();
+    });
+  }
+
+  // eyes
+  var eyeY = -8;
+  var eyeH = isSad || isTired ? 3 : 10;
+  [[-18, eyeY], [18, eyeY]].forEach(function(pt) {
+    var ex = pt[0], ey = pt[1];
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 10, eyeH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    if (eyeH > 3) {
+      ctx.beginPath();
+      ctx.arc(ex + 2, ey + 1, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+  });
+
+  // mouth
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  if (isSad) {
+    ctx.arc(0, 28, 12, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (isHappy) {
+    ctx.arc(0, 16, 14, 0.2, Math.PI - 0.2);
+  } else {
+    ctx.moveTo(-10, 22);
+    ctx.lineTo(10, 22);
+  }
+  ctx.stroke();
+
+  // zzz when resting
+  if (isResting && restTimer > 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillStyle = '#89b4fa';
+    ctx.textAlign = 'center';
+    ctx.fillText('z z z', 48, -50 + Math.sin(t) * 4);
+    ctx.restore();
+  }
+
+  ctx.restore();
+
+  // particles
+  particles = particles.filter(function(p) { return p.life > 0; });
+  particles.forEach(function(p) {
+    p.x    += p.vx;
+    p.y    += p.vy;
+    p.life -= 0.03;
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    ctx.font = '18px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.emoji, p.x, p.y);
+    ctx.restore();
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+// ── Custom button builder ─────────────────────────────────────────
+function setDir(d) {
+  customDir = d;
+  document.getElementById('dir-add').classList.toggle('selected', d === 'add');
+  document.getElementById('dir-sub').classList.toggle('selected', d === 'sub');
+  updateCustomPreview();
+}
+
+function updateCustomPreview() {
+  var stat   = document.getElementById('ctrl-stat').value;
+  var amount = parseInt(document.getElementById('ctrl-amount').value, 10);
+  var emoji  = document.getElementById('ctrl-emoji').value.trim() || '⭐';
+  var sign   = customDir === 'add' ? '+' : '-';
+  var cap    = customDir === 'add' ? 'Math.min(100, ' + stat + ' + ' + amount + ')' : 'Math.max(0, ' + stat + ' - ' + amount + ')';
+
+  document.getElementById('custom-btn').textContent = emoji + ' My Button';
+
+  var codeEl = document.getElementById('custom-code-box');
+  codeEl.innerHTML =
+    '<span class="kw">function</span> <span class="fn">myButton</span>() {\n' +
+    '&nbsp;&nbsp;' + stat + ' = ' + escHtml(cap) + ';\n' +
+    '&nbsp;&nbsp;<span class="fn">updateBars</span>();\n' +
+    '}';
+}
+
+function escHtml(s) {
+  return s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function doCustomAction() {
+  var stat   = document.getElementById('ctrl-stat').value;
+  var amount = parseInt(document.getElementById('ctrl-amount').value, 10);
+  if (customDir === 'add') {
+    if (stat === 'food')   food   = Math.min(100, food   + amount);
+    if (stat === 'happy')  happy  = Math.min(100, happy  + amount);
+    if (stat === 'energy') energy = Math.min(100, energy + amount);
+  } else {
+    if (stat === 'food')   food   = Math.max(0, food   - amount);
+    if (stat === 'happy')  happy  = Math.max(0, happy  - amount);
+    if (stat === 'energy') energy = Math.max(0, energy - amount);
+  }
+  var emoji = document.getElementById('ctrl-emoji').value.trim() || '⭐';
+  spawnParticles(emoji, 3);
+  updateBars();
+}
+
+// ── Code peek toggle ──────────────────────────────────────────────
+function togglePeek() {
+  var box = document.getElementById('code-peek-box');
+  var btn = document.getElementById('peek-btn');
+  var open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  var btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+updateCustomPreview();
+updateBars();
+</script>
+</body>
+</html>

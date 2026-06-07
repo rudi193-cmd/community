@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Your Creature — CS 4–6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* ── paper + ink ── */
+    --paper:    #f6efe1;   /* warm cream page */
+    --paper-2:  #fffdf8;   /* card surface */
+    --ink:      #2c2440;   /* deep grape charcoal */
+    --ink-soft: #6f6685;
+    --line:     #e6dcc6;   /* warm hairline */
+
+    /* ── brand ── */
+    --grape:      #7c4dff;
+    --grape-deep: #5a32cc;
+    --grape-soft: #efe9ff;
+    --tang:       #ff7a4d;
+    --tang-deep:  #d9532a;
+    --tang-soft:  #ffe7da;
+
+    /* ── stat semantics ── */
+    --mint:  #16c79a;  --mint-deep:#0f9a76;   /* food   */
+    --sun:   #ffc23d;  --sun-deep: #d99300;   /* happy  */
+    --sky:   #3da5ff;  --sky-deep: #1f7ad6;   /* energy */
+    --bubble:#ff5d8f;
+
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow-soft: 0 1px 0 rgba(44,36,64,.04), 0 18px 36px -22px rgba(44,36,64,.45);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Lexend", system-ui, sans-serif;
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, rgba(124,77,255,.10) 1.3px, transparent 1.4px);
+    background-size: 24px 24px;
+    background-position: -2px -2px;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 3rem;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ══════════════════════════════ MASTHEAD ══════════════════════════════ */
+  .masthead {
+    position: relative;
+    max-width: 880px;
+    margin: 1.5rem auto 0;
+    background: var(--grape);
+    color: #fff;
+    border-radius: 26px;
+    padding: 2.1rem 2.2rem;
+    overflow: hidden;
+    box-shadow: 0 6px 0 var(--grape-deep), 0 30px 50px -28px rgba(90,50,204,.8);
+  }
+  .masthead::before {  /* dotted texture */
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.4px, transparent 1.5px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+  .mast-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  @media (max-width: 600px) {
+    .mast-grid { grid-template-columns: 1fr; }
+    .masthead { padding: 1.6rem 1.4rem; }
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--sun);
+    color: #4a3700;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .35rem .8rem;
+    border-radius: 100px;
+    transform: rotate(-1.5deg);
+    box-shadow: 0 3px 0 var(--sun-deep);
+  }
+  .mast-left h1 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.1rem, 6vw, 3.1rem);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    margin: .85rem 0 .55rem;
+  }
+  .mast-left h1 .amp { color: var(--sun); font-style: italic; }
+  .bigq {
+    font-size: clamp(1.05rem, 2.4vw, 1.22rem);
+    line-height: 1.45;
+    color: rgba(255,255,255,.9);
+    max-width: 30ch;
+  }
+  .bigq em { color: var(--sun); font-style: normal; font-weight: 600; }
+  .mast-trail {
+    margin-top: 1rem;
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .82rem; color: rgba(255,255,255,.72);
+    font-weight: 500;
+  }
+  .mast-trail .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--tang); }
+
+  /* pet tank */
+  .mast-pet { display: flex; flex-direction: column; align-items: center; gap: .55rem; }
+  .pet-tank {
+    position: relative;
+    width: 168px; height: 152px;
+    background: var(--paper-2);
+    border-radius: 22px;
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.5), 0 8px 0 rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  .pet-tank::after {  /* little floor shadow */
+    content:""; position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    width: 84px; height: 14px; border-radius: 50%;
+    background: rgba(44,36,64,.10);
+    filter: blur(1px);
+  }
+  #mascot { position: relative; z-index: 1; display: block; }
+  .pet-name {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700; font-size: .8rem;
+    background: #fff; color: var(--grape);
+    padding: .25rem .8rem; border-radius: 100px;
+    transform: rotate(2deg);
+    box-shadow: 0 3px 0 rgba(0,0,0,.15);
+  }
+
+  /* ══════════════════════════════ TABS ══════════════════════════════ */
+  .tabs {
+    max-width: 880px;
+    margin: 1.4rem auto 0;
+    padding: 0 .4rem;
+    display: flex;
+    gap: .6rem;
+  }
+  .tab-btn {
+    flex: 1;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 16px 16px 0 0;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    transition: transform .12s ease, color .15s, background .15s, border-color .15s;
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+  }
+  .tab-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--line); color: var(--ink-soft);
+    font-size: .82rem; flex-shrink: 0;
+    transition: background .15s, color .15s;
+  }
+  .tab-btn:hover:not(.locked):not(.active) { color: var(--ink); transform: translateY(-2px); }
+  .tab-btn.active {
+    color: var(--grape);
+    background: var(--paper-2);
+    border-color: var(--grape);
+    border-bottom-color: var(--paper-2);
+    box-shadow: 0 -4px 0 var(--grape-soft) inset;
+  }
+  .tab-btn.active .tab-num { background: var(--grape); color: #fff; }
+  .tab-btn.locked { opacity: .55; cursor: not-allowed; }
+  .tab-lock { font-size: .9rem; }
+
+  /* ══════════════════════════════ SHEET ══════════════════════════════ */
+  .sheet {
+    max-width: 880px;
+    margin: 0 auto;
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 0 0 24px 24px;
+    box-shadow: var(--shadow-soft);
+  }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ── lesson content ── */
+  .lesson-content { padding: 2.2rem clamp(1.25rem, 4vw, 2.8rem) 2.6rem; }
+
+  .lead {
+    font-size: 1.16rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 1.8rem;
+  }
+  .lead .hl { background: linear-gradient(transparent 62%, var(--sun) 62%); padding: 0 .1em; }
+
+  .sec-head {
+    display: flex; align-items: center; gap: .7rem;
+    margin: 2.4rem 0 .9rem;
+  }
+  .sec-head:first-child { margin-top: 0; }
+  .sec-num {
+    flex-shrink: 0;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: var(--grape); color: #fff;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .92rem;
+    transform: rotate(-4deg);
+    box-shadow: 0 3px 0 var(--grape-deep);
+  }
+  .sec-head h2 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.42rem;
+    letter-spacing: -.01em;
+    color: var(--ink);
+  }
+  .lesson-content p { margin-bottom: 1.05rem; }
+  .lesson-content p code, .lesson-content li code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: .86em;
+    background: var(--grape-soft);
+    color: var(--grape-deep);
+    padding: .1em .42em;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .lesson-content ul { margin: .4rem 0 1.1rem 0; list-style: none; }
+  .lesson-content li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin-bottom: .55rem;
+  }
+  .lesson-content li::before {
+    content: "›";
+    position: absolute; left: .35rem; top: -.05rem;
+    color: var(--tang); font-weight: 700; font-size: 1.1rem;
+  }
+
+  /* ── editor code window ── */
+  .editor {
+    margin: 1.1rem 0 1.4rem;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #2a2440;
+    box-shadow: 0 4px 0 rgba(44,36,64,.25), 0 22px 40px -26px rgba(44,36,64,.8);
+  }
+  .editor-bar {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .6rem .9rem;
+    background: #221d36;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .editor-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .editor-bar .dot.r { background: var(--tang); }
+  .editor-bar .dot.y { background: var(--sun); }
+  .editor-bar .dot.g { background: var(--mint); }
+  .editor-file {
+    margin-left: .5rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .76rem; font-weight: 500;
+    color: rgba(255,255,255,.5);
+    letter-spacing: .02em;
+  }
+  .editor-tag {
+    margin-left: auto;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: rgba(255,255,255,.32);
+  }
+  .editor-body {
+    padding: 1.05rem 1.25rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .85rem;
+    line-height: 1.75;
+    color: #e7e2ff;
+    overflow-x: auto;
+  }
+  .kw  { color: #c4b5ff; }
+  .str { color: #5fe3c0; }
+  .num { color: #ffb27a; }
+  .cmt { color: #7a7196; font-style: italic; }
+  .fn  { color: #7ec8ff; }
+
+  /* ── sticky note callout ── */
+  .note {
+    position: relative;
+    background: var(--sun);
+    color: #4a3700;
+    border-radius: 4px 12px 12px 12px;
+    padding: 1.15rem 1.3rem 1.2rem;
+    margin: 1.5rem 0;
+    box-shadow: 0 10px 24px -14px rgba(217,147,0,.8);
+    transform: rotate(-.5deg);
+  }
+  .note::before {  /* tape */
+    content: "";
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+    width: 78px; height: 20px;
+    background: rgba(255,255,255,.45);
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+  .note strong { font-family: "Bricolage Grotesque", sans-serif; }
+  .note.note--grape { background: var(--grape-soft); color: var(--grape-deep); box-shadow: 0 10px 24px -14px rgba(124,77,255,.6); }
+  .note.note--grape::before { background: rgba(124,77,255,.22); }
+
+  /* ── ask / think prompt ── */
+  .ask {
+    display: flex; gap: .8rem; align-items: flex-start;
+    background: var(--tang-soft);
+    border: 2px dashed var(--tang);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    margin: 1.4rem 0;
+  }
+  .ask .q {
+    flex-shrink: 0;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800;
+    color: var(--tang-deep);
+    font-size: 1.3rem; line-height: 1;
+    margin-top: .1rem;
+  }
+  .ask p { margin: 0 !important; color: #7a3d22; font-size: .98rem; }
+
+  /* ── ready button ── */
+  .ready-wrap { text-align: center; margin-top: 2.6rem; }
+  .ready-btn {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800; font-size: 1.12rem;
+    color: #fff; background: var(--tang);
+    border: none; border-radius: 16px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--tang-deep);
+    transition: transform .1s ease, box-shadow .1s ease;
+    display: inline-flex; align-items: center; gap: .6rem;
+  }
+  .ready-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--tang-deep); }
+  .ready-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--tang-deep); }
+  .ready-sub { margin-top: .8rem; font-size: .85rem; color: var(--ink-soft); }
+
+  /* ══════════════════════════════ SANDBOX ══════════════════════════════ */
+  .sandbox {
+    padding: 1.8rem clamp(1rem, 3vw, 2rem) 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+  @media (min-width: 720px) { .sandbox { grid-template-columns: 300px 1fr; align-items: start; } }
+
+  /* device */
+  .device {
+    background: var(--grape);
+    border-radius: 24px;
+    padding: 1.1rem;
+    box-shadow: 0 6px 0 var(--grape-deep), 0 26px 44px -28px rgba(90,50,204,.8);
+    position: relative;
+  }
+  .device-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: .1rem .3rem .7rem;
+    color: rgba(255,255,255,.85);
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .82rem; letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .device-top .led { display: inline-flex; gap: 5px; }
+  .device-top .led i { width: 8px; height: 8px; border-radius: 50%; background: var(--sun); display: inline-block; }
+  .device-top .led i:nth-child(2){ background: var(--mint); }
+  .device-top .led i:nth-child(3){ background: var(--tang); }
+  .screen {
+    background: #fdf3e7;
+    border-radius: 16px;
+    padding: .6rem;
+    box-shadow: inset 0 2px 8px rgba(44,36,64,.18);
+  }
+  #c { display: block; width: 100%; height: auto; border-radius: 11px; background: transparent; }
+  .mood-caption {
+    text-align: center;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .9rem; color: var(--grape-deep);
+    background: #fff;
+    margin: .55rem .2rem 0;
+    padding: .35rem; border-radius: 10px;
+  }
+
+  .stat-bars { margin: .9rem .2rem .2rem; display: flex; flex-direction: column; gap: .55rem; }
+  .stat-row { display: flex; align-items: center; gap: .55rem; }
+  .stat-label {
+    width: 54px; flex-shrink: 0;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .76rem; color: #fff; letter-spacing: .02em;
+  }
+  .stat-track {
+    flex: 1; height: 13px;
+    background: rgba(0,0,0,.22);
+    border-radius: 100px; overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.25);
+  }
+  .stat-fill { height: 100%; border-radius: 100px; transition: width .4s cubic-bezier(.34,1.3,.5,1); position: relative; }
+  .stat-fill::after { content:""; position:absolute; top:2px; left:5px; right:5px; height:3px; border-radius:100px; background:rgba(255,255,255,.4); }
+  .stat-fill.food   { background: var(--mint); }
+  .stat-fill.happy  { background: var(--sun); }
+  .stat-fill.energy { background: var(--sky); }
+  .stat-pct { width: 34px; text-align: right; font-size: .76rem; font-weight: 600; color: rgba(255,255,255,.8); flex-shrink: 0; }
+
+  .action-btns { display: flex; gap: .5rem; margin: .9rem .2rem .1rem; }
+  .action-btn {
+    flex: 1;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .92rem;
+    border: none; border-radius: 13px;
+    padding: .7rem .4rem;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .action-btn:active { transform: translateY(4px); }
+  .btn-feed { background: var(--mint); color: #053a2d; box-shadow: 0 4px 0 var(--mint-deep); }
+  .btn-feed:active { box-shadow: 0 0 0 var(--mint-deep); }
+  .btn-play { background: var(--sun); color: #4a3700; box-shadow: 0 4px 0 var(--sun-deep); }
+  .btn-play:active { box-shadow: 0 0 0 var(--sun-deep); }
+  .btn-rest { background: var(--sky); color: #06294d; box-shadow: 0 4px 0 var(--sky-deep); }
+  .btn-rest:active { box-shadow: 0 0 0 var(--sky-deep); }
+
+  /* builder bench */
+  .builder {
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 1.3rem;
+    display: flex; flex-direction: column; gap: 1.05rem;
+  }
+  .builder-head {
+    display: flex; align-items: center; gap: .6rem;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800;
+    font-size: 1.15rem; color: var(--ink);
+    padding-bottom: .75rem; border-bottom: 2px solid var(--line);
+  }
+  .builder-head .chip {
+    background: var(--tang); color: #fff; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+    padding: .2rem .55rem; border-radius: 100px; box-shadow: 0 2px 0 var(--tang-deep);
+  }
+  .ctl { display: flex; flex-direction: column; gap: .4rem; }
+  .ctl > label {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ctl select {
+    width: 100%; padding: .6rem .7rem;
+    border: 2px solid var(--line); border-radius: 11px;
+    font-family: "Lexend", sans-serif; font-size: .95rem; color: var(--ink);
+    background: var(--paper); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .ctl select:focus { outline: none; border-color: var(--grape); }
+  .slider-val {
+    font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--grape);
+    background: var(--grape-soft); padding: .05rem .5rem; border-radius: 7px; font-size: .85rem;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--grape); cursor: pointer; height: 22px; }
+
+  .dir-row { display: flex; gap: .5rem; }
+  .dir-btn {
+    flex: 1; padding: .55rem;
+    border: 2px solid var(--line); border-radius: 11px;
+    background: var(--paper); cursor: pointer;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .9rem; color: var(--ink-soft);
+    transition: border-color .12s, background .12s, color .12s, transform .1s;
+  }
+  .dir-btn:hover { transform: translateY(-1px); }
+  .dir-btn.selected { border-color: var(--grape); background: var(--grape-soft); color: var(--grape-deep); }
+
+  .emoji-map { display: flex; flex-wrap: wrap; gap: 5px; }
+  .emoji-chip {
+    font-size: 1.25rem; line-height: 1; padding: 5px 6px;
+    border-radius: 9px; cursor: pointer;
+    background: var(--paper); border: 2px solid var(--line);
+    transition: border-color .1s, background .1s, transform .1s;
+    user-select: none;
+  }
+  .emoji-chip:hover { border-color: var(--grape); transform: translateY(-2px) scale(1.05); }
+  .emoji-chip.selected { border-color: var(--grape); background: var(--grape-soft); }
+  .emoji-text {
+    width: 100%; margin-top: 6px; padding: .45rem .6rem;
+    border: 2px solid var(--line); border-radius: 10px;
+    font-family: "Lexend", sans-serif; font-size: .95rem; text-align: center;
+  }
+  .emoji-text:focus { outline: none; border-color: var(--grape); }
+
+  .make-btn {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1rem;
+    color: #fff; background: var(--grape); border: none; border-radius: 13px;
+    padding: .75rem 1rem; cursor: pointer;
+    box-shadow: 0 5px 0 var(--grape-deep);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .make-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--grape-deep); }
+  .make-btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--grape-deep); }
+
+  .code-inline {
+    background: #2a2440; color: #e7e2ff;
+    border-radius: 11px; padding: .8rem 1rem;
+    font-family: "JetBrains Mono", monospace; font-size: .78rem; line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* peek */
+  .peek-wrap { padding: 0 clamp(1rem, 3vw, 2rem) 1.6rem; }
+  .peek-toggle {
+    display: flex; align-items: center; gap: .6rem; width: 100%;
+    background: var(--grape-soft); border: 2px solid var(--grape-soft);
+    border-radius: 14px; padding: .85rem 1.2rem; cursor: pointer;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .95rem; color: var(--grape-deep);
+    transition: border-color .15s, transform .1s;
+  }
+  .peek-toggle:hover { border-color: var(--grape); transform: translateY(-1px); }
+  .peek-toggle .arrow { margin-left: auto; transition: transform .25s; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; margin-top: .8rem; }
+  #code-peek-box.open { display: block; animation: fadeUp .3s ease; }
+
+  /* footer */
+  .lesson-footer {
+    max-width: 880px; margin: 2rem auto 0; text-align: center;
+    font-size: .82rem; color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .lesson-footer a { color: var(--grape-deep); text-decoration: none; font-weight: 600; }
+  .lesson-footer a:hover { text-decoration: underline; }
+  .footer-mark {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: .14em;
+    color: var(--grape); font-size: .95rem; display: block; margin-bottom: .3rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    html { scroll-behavior: auto; }
+  }
+
+</style>
+</head>
+<body>
+
+
+<header class="masthead">
+  <div class="eyebrow">Grades 4–6 · Computer Science</div>
+    <div class="mast-pet">
+      <div class="pet-tank">
+        <canvas id="mascot" width="168" height="152"></canvas>
+      </div>
+      <span class="pet-name">click me!</span>
+    </div></div>
+  <h1>Design Your Creature</h1>
+  <p>If you had a pet that lived inside a computer, what would it need?</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept', this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-sandbox" onclick="switchTab('sandbox', this)" role="tab">Part 2 — Build It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="lead">What does your creature need to stay healthy?</p>
+    <p>Think about real animals before you answer. A dog needs food, sleep, and attention. A fish needs water and food. A cat needs food, sleep, and to be left alone at the exact right moments.</p>
+    <p>Your creature will need things too — and it will be your job to decide what those things are.</p>
+
+    <h2>Variables: how a program remembers</h2>
+    <p>A computer program can't just "know" that your creature is hungry. Someone has to tell it. And that information has to live somewhere.</p>
+    <p>Programmers use something called a <strong>variable</strong> — a container with a name that holds a value. Think of it like a labeled jar.</p>
+
+    <div class="editor">
+      <span class="kw">let</span> food   = <span class="num">80</span>;  <span class="cmt">// 80 out of 100 — not hungry yet</span><br>
+      <span class="kw">let</span> happy  = <span class="num">70</span>;  <span class="cmt">// 70 out of 100 — pretty happy</span><br>
+      <span class="kw">let</span> energy = <span class="num">50</span>;  <span class="cmt">// 50 out of 100 — getting tired</span>
+    </div>
+
+    <p>Those three lines are a complete picture of how your creature is doing right now. Every time you feed it, the food number goes up. Every time it runs around, the energy number goes down.</p>
+
+    <div class="note">
+      <strong>The key idea:</strong> a program doesn't feel things — it tracks numbers. Your job as the designer is to decide which numbers matter, and what happens when they get too low.
+    </div>
+
+    <h2>States: what the numbers mean</h2>
+    <p>A number on its own isn't very interesting. But a number that <em>changes something</em> is.</p>
+    <p>When food drops below 20, maybe your creature gets droopy eyes. When happy reaches 100, maybe it bounces. When energy hits zero, maybe it falls asleep whether you want it to or not.</p>
+    <p>These are called <strong>states</strong> — different conditions your creature can be in, depending on its numbers.</p>
+
+    <div class="editor">
+      <span class="kw">if</span> (food &lt; <span class="num">20</span>) {<br>
+      &nbsp;&nbsp;<span class="cmt">// creature looks tired and sad</span><br>
+      } <span class="kw">else if</span> (food &gt; <span class="num">80</span>) {<br>
+      &nbsp;&nbsp;<span class="cmt">// creature looks full and happy</span><br>
+      } <span class="kw">else</span> {<br>
+      &nbsp;&nbsp;<span class="cmt">// creature is doing fine</span><br>
+      }
+    </div>
+
+    <h2>The special behavior question</h2>
+    <p>This is the most important question you'll answer today:</p>
+
+    <div class="note">
+      <strong>What is one thing your creature does that no other creature does?</strong>
+    </div>
+
+    <p>Not something generic. Not "it jumps." Something that is specific to <em>this creature</em>, with <em>this name</em>.</p>
+    <p>One kid's creature — a headless rotisserie chicken named Gerald — keeps oracle notes on a napkin. That's not a feature anyone planned. It came from the kid. It made Gerald the most interesting character in the whole project.</p>
+    <p>When you're ready, click the button below to start building.</p>
+
+    <button class="ready-btn" onclick="unlockSandbox()">I'm ready to build my creature →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-sandbox" class="tab-section">
+
+  <div class="sandbox">
+
+    <!-- Stage -->
+    <div class="sandbox-stage">
+      <div class="creature-name-display" id="name-display">My Creature</div>
+      <canvas id="c" width="220" height="180" title="Click to pet your creature!"></canvas>
+      <div class="stat-bars">
+        <div class="stat-row">
+          <span class="stat-label">Food</span>
+          <div class="stat-track"><div class="stat-fill food" id="bar-food" style="width:80%"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Happy</span>
+          <div class="stat-track"><div class="stat-fill happy" id="bar-happy" style="width:70%"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Energy</span>
+          <div class="stat-track"><div class="stat-fill energy" id="bar-energy" style="width:50%"></div></div>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button class="action-btn btn-feed"  onclick="doAction('feed')">🍎 Feed</button>
+        <button class="action-btn btn-pet"   onclick="doAction('pet')">✨ Pet</button>
+        <button class="action-btn btn-sleep" onclick="doAction('sleep')">💤 Rest</button>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="builder">
+      <h3>Design your creature</h3>
+
+      <div class="control-group">
+        <label for="ctrl-name">Name</label>
+        <input type="text" id="ctrl-name" value="My Creature" maxlength="20" placeholder="Name your creature">
+      </div>
+
+      <div class="control-group">
+        <label>Color</label>
+        <div class="color-row">
+          <input type="color" id="ctrl-color" value="#6c63ff">
+          <span class="color-swatch-label">Pick any color — your creature changes instantly.</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Starting food <span class="slider-val" id="val-food">80</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-food" min="0" max="100" value="80">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Starting happy <span class="slider-val" id="val-happy">70</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-happy" min="0" max="100" value="70">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Starting energy <span class="slider-val" id="val-energy">50</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-energy" min="0" max="100" value="50">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="ctrl-special">Special behavior</label>
+        <select id="ctrl-special">
+          <option value="bounce">Bounces when happy</option>
+          <option value="glow">Glows when full</option>
+          <option value="spin">Spins when petted</option>
+          <option value="blink">Blinks fast when tired</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Code peek -->
+  <div class="code-peek-section">
+    <button class="peek-toggle" id="peek-btn" onclick="togglePeek()">
+      <span>👾 Peek at the code behind your creature</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div id="code-peek-box">
+      <div class="editor" id="code-peek-content"></div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="lesson-footer">
+  Design Your Creature · Grades 4–6 · Computer Science ·
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────
+const state = {
+  name:    'My Creature',
+  color:   '#6c63ff',
+  food:    80,
+  happy:   70,
+  energy:  50,
+  special: 'bounce',
+  // animation
+  bounce:  0,   // 0–1 bounce phase
+  spin:    0,   // rotation in radians
+  glow:    0,   // 0–1 glow alpha
+  blinkT:  0,   // countdown to next blink
+  blinkOpen: true,
+  petting: 0,   // heart burst counter
+  hearts:  [],  // [{x,y,life}]
+  t:       0,   // global tick
+};
+
+// ── Canvas setup ───────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ── Controls wiring ────────────────────────────────────────────────
+function wire(id, key, valId) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    state[key] = (el.type === 'range') ? parseInt(el.value, 10) : el.value;
+    if (valId) document.getElementById(valId).textContent = el.value;
+    if (key !== 'color' && key !== 'name' && key !== 'special') updateBars();
+    if (key === 'name') document.getElementById('name-display').textContent = el.value || '?';
+    updateCodePeek();
+  });
+}
+wire('ctrl-name',    'name',    null);
+wire('ctrl-color',   'color',   null);
+wire('ctrl-food',    'food',    'val-food');
+wire('ctrl-happy',   'happy',   'val-happy');
+wire('ctrl-energy',  'energy',  'val-energy');
+wire('ctrl-special', 'special', null);
+
+// ── Stat bars ──────────────────────────────────────────────────────
+function updateBars() {
+  document.getElementById('bar-food').style.width   = state.food   + '%';
+  document.getElementById('bar-happy').style.width  = state.happy  + '%';
+  document.getElementById('bar-energy').style.width = state.energy + '%';
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function doAction(action) {
+  if (action === 'feed') {
+    state.food  = Math.min(100, state.food  + 20);
+    state.happy = Math.min(100, state.happy + 5);
+    document.getElementById('ctrl-food').value  = state.food;
+    document.getElementById('val-food').textContent = state.food;
+  } else if (action === 'pet') {
+    state.happy  = Math.min(100, state.happy  + 15);
+    state.petting = 8;
+    spawnHearts(3);
+    if (state.special === 'spin') state.spin += Math.PI * 0.5;
+    document.getElementById('ctrl-happy').value = state.happy;
+    document.getElementById('val-happy').textContent = state.happy;
+  } else if (action === 'sleep') {
+    state.energy = Math.min(100, state.energy + 25);
+    document.getElementById('ctrl-energy').value = state.energy;
+    document.getElementById('val-energy').textContent = state.energy;
+  }
+  updateBars();
+  updateCodePeek();
+}
+
+canvas.addEventListener('click', () => doAction('pet'));
+
+function spawnHearts(n) {
+  for (let i = 0; i < n; i++) {
+    state.hearts.push({
+      x: W/2 + (Math.random() - 0.5) * 60,
+      y: H/2 - 20 + (Math.random() - 0.5) * 30,
+      life: 1.0,
+    });
+  }
+}
+
+// ── Natural decay (slow, visible) ──────────────────────────────────
+let lastDecay = Date.now();
+function applyDecay() {
+  const now = Date.now();
+  const mins = (now - lastDecay) / 60000;
+  lastDecay = now;
+  state.food   = Math.max(0, state.food   - mins * 3);
+  state.happy  = Math.max(0, state.happy  - mins * 2);
+  state.energy = Math.max(0, state.energy - mins * 1.5);
+  // sync sliders
+  document.getElementById('ctrl-food').value    = Math.round(state.food);
+  document.getElementById('val-food').textContent = Math.round(state.food);
+  document.getElementById('ctrl-happy').value   = Math.round(state.happy);
+  document.getElementById('val-happy').textContent = Math.round(state.happy);
+  document.getElementById('ctrl-energy').value  = Math.round(state.energy);
+  document.getElementById('val-energy').textContent = Math.round(state.energy);
+  updateBars();
+  updateCodePeek();
+}
+setInterval(applyDecay, 10000);
+
+// ── Drawing ────────────────────────────────────────────────────────
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+function drawCreature() {
+  const t = state.t;
+  state.t += 0.04;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // derived values
+  const isHappy   = state.happy > 70;
+  const isSad     = state.food  < 25 || state.happy < 25;
+  const isTired   = state.energy < 25;
+  const isFull    = state.food > 80;
+
+  // special behavior effects
+  let bounceY = 0;
+  if (state.special === 'bounce' && isHappy) {
+    bounceY = Math.abs(Math.sin(t * 3)) * -10;
+  }
+
+  let glowAlpha = 0;
+  if (state.special === 'glow' && isFull) {
+    glowAlpha = 0.35 + Math.sin(t * 2) * 0.15;
+  }
+
+  if (state.special === 'spin') {
+    state.spin *= 0.92; // dampen
+  }
+
+  // blink logic
+  state.blinkT--;
+  if (state.blinkT <= 0) {
+    state.blinkOpen = !state.blinkOpen;
+    state.blinkT = state.blinkOpen
+      ? (state.special === 'blink' && isTired ? 8 : 40 + Math.random() * 30)
+      : 5;
+  }
+
+  // center
+  const cx = W / 2;
+  const cy = H / 2 + 10 + bounceY;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (state.special === 'spin') ctx.rotate(state.spin);
+
+  // glow halo
+  if (glowAlpha > 0) {
+    const rgb = hexToRgb(state.color);
+    const grd = ctx.createRadialGradient(0, 0, 20, 0, 0, 70);
+    grd.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},${glowAlpha})`);
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0, 0, 70, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // body blob
+  const bw = 54, bh = 60;
+  const wobble = Math.sin(t * 1.2) * 2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, bw + wobble, bh - wobble * 0.5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = state.color;
+  ctx.fill();
+
+  // body sheen
+  ctx.beginPath();
+  ctx.ellipse(-10, -12, 18, 14, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fill();
+
+  // sad droop or happy shape
+  if (isSad) {
+    // droopy cheeks
+    ctx.beginPath();
+    ctx.ellipse(-22, 8, 10, 7, 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(22, 8, 10, 7, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // eyes
+  const eyeY = -8;
+  const eyeOpenH = isTired ? 4 : 10;
+  [[-18, eyeY], [18, eyeY]].forEach(([ex, ey]) => {
+    // white
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 10, state.blinkOpen ? eyeOpenH : 2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    if (state.blinkOpen) {
+      // pupil
+      ctx.beginPath();
+      ctx.arc(ex + 2, ey + 1, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      // shine
+      ctx.beginPath();
+      ctx.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+  });
+
+  // mouth
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  if (isSad) {
+    ctx.arc(0, 28, 12, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (isHappy) {
+    ctx.arc(0, 16, 14, 0.2, Math.PI - 0.2);
+  } else {
+    ctx.moveTo(-10, 22);
+    ctx.lineTo(10, 22);
+  }
+  ctx.stroke();
+
+  // blush when petted
+  if (state.petting > 0) {
+    state.petting--;
+    const ba = state.petting / 8;
+    [[-24, 14], [24, 14]].forEach(([bx, by]) => {
+      ctx.beginPath();
+      ctx.ellipse(bx, by, 11, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,150,150,${ba * 0.5})`;
+      ctx.fill();
+    });
+  }
+
+  ctx.restore();
+
+  // floating hearts
+  state.hearts = state.hearts.filter(h => h.life > 0);
+  state.hearts.forEach(h => {
+    h.y   -= 1.2;
+    h.life -= 0.04;
+    ctx.save();
+    ctx.globalAlpha = h.life;
+    ctx.font = '16px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('♥', h.x, h.y);
+    ctx.restore();
+  });
+
+  // tired zzz
+  if (isTired) {
+    const zx = cx + 40, zy = cy - 55 + Math.sin(t) * 4;
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillStyle = '#89b4fa';
+    ctx.textAlign = 'center';
+    ctx.fillText('z z z', zx, zy);
+    ctx.restore();
+  }
+}
+
+function loop() {
+  drawCreature();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// ── Code peek ─────────────────────────────────────────────────────
+function updateCodePeek() {
+  const el = document.getElementById('code-peek-content');
+  const nm  = (state.name || 'My Creature').replace(/</g,'&lt;');
+  const col = state.color;
+  const f   = Math.round(state.food);
+  const h   = Math.round(state.happy);
+  const e   = Math.round(state.energy);
+  el.innerHTML =
+    `<span class="kw">let</span> name   = <span class="str">"${nm}"</span>;   <span class="cmt">// your creature's name</span>\n` +
+    `<span class="kw">let</span> color  = <span class="str">"${col}"</span>; <span class="cmt">// changes when you pick a color</span>\n\n` +
+    `<span class="kw">let</span> food   = <span class="num">${f}</span>;   <span class="cmt">// 0–100: how hungry it is</span>\n` +
+    `<span class="kw">let</span> happy  = <span class="num">${h}</span>;   <span class="cmt">// 0–100: how happy it is</span>\n` +
+    `<span class="kw">let</span> energy = <span class="num">${e}</span>;   <span class="cmt">// 0–100: how tired it is</span>\n\n` +
+    `<span class="cmt">// What happens when food runs out:</span>\n` +
+    `<span class="kw">if</span> (food &lt; <span class="num">25</span>) { creature.lookSad(); }\n\n` +
+    `<span class="cmt">// Special behavior: ${state.special}</span>\n` +
+    specialComment(state.special);
+}
+
+function specialComment(sp) {
+  const map = {
+    bounce: `<span class="kw">if</span> (happy &gt; <span class="num">70</span>) { creature.bounce(); }`,
+    glow:   `<span class="kw">if</span> (food &gt; <span class="num">80</span>) { creature.glow(); }`,
+    spin:   `<span class="kw">if</span> (petted) { creature.spin(); }`,
+    blink:  `<span class="kw">if</span> (energy &lt; <span class="num">25</span>) { creature.blinkFast(); }`,
+  };
+  return map[sp] || '';
+}
+
+function togglePeek() {
+  const box = document.getElementById('code-peek-box');
+  const btn = document.getElementById('peek-btn');
+  const open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) updateCodePeek();
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  const btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+updateCodePeek();
+</script>
+
+<script>
+'use strict';
+
+
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────
+const state = {
+  name:    'My Creature',
+  color:   '#6c63ff',
+  food:    80,
+  happy:   70,
+  energy:  50,
+  special: 'bounce',
+  // animation
+  bounce:  0,   // 0–1 bounce phase
+  spin:    0,   // rotation in radians
+  glow:    0,   // 0–1 glow alpha
+  blinkT:  0,   // countdown to next blink
+  blinkOpen: true,
+  petting: 0,   // heart burst counter
+  hearts:  [],  // [{x,y,life}]
+  t:       0,   // global tick
+};
+
+// ── Canvas setup ───────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ── Controls wiring ────────────────────────────────────────────────
+function wire(id, key, valId) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    state[key] = (el.type === 'range') ? parseInt(el.value, 10) : el.value;
+    if (valId) document.getElementById(valId).textContent = el.value;
+    if (key !== 'color' && key !== 'name' && key !== 'special') updateBars();
+    if (key === 'name') document.getElementById('name-display').textContent = el.value || '?';
+    updateCodePeek();
+  });
+}
+wire('ctrl-name',    'name',    null);
+wire('ctrl-color',   'color',   null);
+wire('ctrl-food',    'food',    'val-food');
+wire('ctrl-happy',   'happy',   'val-happy');
+wire('ctrl-energy',  'energy',  'val-energy');
+wire('ctrl-special', 'special', null);
+
+// ── Stat bars ──────────────────────────────────────────────────────
+function updateBars() {
+  document.getElementById('bar-food').style.width   = state.food   + '%';
+  document.getElementById('bar-happy').style.width  = state.happy  + '%';
+  document.getElementById('bar-energy').style.width = state.energy + '%';
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function doAction(action) {
+  if (action === 'feed') {
+    state.food  = Math.min(100, state.food  + 20);
+    state.happy = Math.min(100, state.happy + 5);
+    document.getElementById('ctrl-food').value  = state.food;
+    document.getElementById('val-food').textContent = state.food;
+  } else if (action === 'pet') {
+    state.happy  = Math.min(100, state.happy  + 15);
+    state.petting = 8;
+    spawnHearts(3);
+    if (state.special === 'spin') state.spin += Math.PI * 0.5;
+    document.getElementById('ctrl-happy').value = state.happy;
+    document.getElementById('val-happy').textContent = state.happy;
+  } else if (action === 'sleep') {
+    state.energy = Math.min(100, state.energy + 25);
+    document.getElementById('ctrl-energy').value = state.energy;
+    document.getElementById('val-energy').textContent = state.energy;
+  }
+  updateBars();
+  updateCodePeek();
+}
+
+canvas.addEventListener('click', () => doAction('pet'));
+
+function spawnHearts(n) {
+  for (let i = 0; i < n; i++) {
+    state.hearts.push({
+      x: W/2 + (Math.random() - 0.5) * 60,
+      y: H/2 - 20 + (Math.random() - 0.5) * 30,
+      life: 1.0,
+    });
+  }
+}
+
+// ── Natural decay (slow, visible) ──────────────────────────────────
+let lastDecay = Date.now();
+function applyDecay() {
+  const now = Date.now();
+  const mins = (now - lastDecay) / 60000;
+  lastDecay = now;
+  state.food   = Math.max(0, state.food   - mins * 3);
+  state.happy  = Math.max(0, state.happy  - mins * 2);
+  state.energy = Math.max(0, state.energy - mins * 1.5);
+  // sync sliders
+  document.getElementById('ctrl-food').value    = Math.round(state.food);
+  document.getElementById('val-food').textContent = Math.round(state.food);
+  document.getElementById('ctrl-happy').value   = Math.round(state.happy);
+  document.getElementById('val-happy').textContent = Math.round(state.happy);
+  document.getElementById('ctrl-energy').value  = Math.round(state.energy);
+  document.getElementById('val-energy').textContent = Math.round(state.energy);
+  updateBars();
+  updateCodePeek();
+}
+setInterval(applyDecay, 10000);
+
+// ── Drawing ────────────────────────────────────────────────────────
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+function drawCreature() {
+  const t = state.t;
+  state.t += 0.04;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // derived values
+  const isHappy   = state.happy > 70;
+  const isSad     = state.food  < 25 || state.happy < 25;
+  const isTired   = state.energy < 25;
+  const isFull    = state.food > 80;
+
+  // special behavior effects
+  let bounceY = 0;
+  if (state.special === 'bounce' && isHappy) {
+    bounceY = Math.abs(Math.sin(t * 3)) * -10;
+  }
+
+  let glowAlpha = 0;
+  if (state.special === 'glow' && isFull) {
+    glowAlpha = 0.35 + Math.sin(t * 2) * 0.15;
+  }
+
+  if (state.special === 'spin') {
+    state.spin *= 0.92; // dampen
+  }
+
+  // blink logic
+  state.blinkT--;
+  if (state.blinkT <= 0) {
+    state.blinkOpen = !state.blinkOpen;
+    state.blinkT = state.blinkOpen
+      ? (state.special === 'blink' && isTired ? 8 : 40 + Math.random() * 30)
+      : 5;
+  }
+
+  // center
+  const cx = W / 2;
+  const cy = H / 2 + 10 + bounceY;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (state.special === 'spin') ctx.rotate(state.spin);
+
+  // glow halo
+  if (glowAlpha > 0) {
+    const rgb = hexToRgb(state.color);
+    const grd = ctx.createRadialGradient(0, 0, 20, 0, 0, 70);
+    grd.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},${glowAlpha})`);
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(0, 0, 70, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // body blob
+  const bw = 54, bh = 60;
+  const wobble = Math.sin(t * 1.2) * 2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, bw + wobble, bh - wobble * 0.5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = state.color;
+  ctx.fill();
+
+  // body sheen
+  ctx.beginPath();
+  ctx.ellipse(-10, -12, 18, 14, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)';
+  ctx.fill();
+
+  // sad droop or happy shape
+  if (isSad) {
+    // droopy cheeks
+    ctx.beginPath();
+    ctx.ellipse(-22, 8, 10, 7, 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(22, 8, 10, 7, -0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // eyes
+  const eyeY = -8;
+  const eyeOpenH = isTired ? 4 : 10;
+  [[-18, eyeY], [18, eyeY]].forEach(([ex, ey]) => {
+    // white
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 10, state.blinkOpen ? eyeOpenH : 2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    if (state.blinkOpen) {
+      // pupil
+      ctx.beginPath();
+      ctx.arc(ex + 2, ey + 1, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      // shine
+      ctx.beginPath();
+      ctx.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+  });
+
+  // mouth
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  if (isSad) {
+    ctx.arc(0, 28, 12, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (isHappy) {
+    ctx.arc(0, 16, 14, 0.2, Math.PI - 0.2);
+  } else {
+    ctx.moveTo(-10, 22);
+    ctx.lineTo(10, 22);
+  }
+  ctx.stroke();
+
+  // blush when petted
+  if (state.petting > 0) {
+    state.petting--;
+    const ba = state.petting / 8;
+    [[-24, 14], [24, 14]].forEach(([bx, by]) => {
+      ctx.beginPath();
+      ctx.ellipse(bx, by, 11, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,150,150,${ba * 0.5})`;
+      ctx.fill();
+    });
+  }
+
+  ctx.restore();
+
+  // floating hearts
+  state.hearts = state.hearts.filter(h => h.life > 0);
+  state.hearts.forEach(h => {
+    h.y   -= 1.2;
+    h.life -= 0.04;
+    ctx.save();
+    ctx.globalAlpha = h.life;
+    ctx.font = '16px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('♥', h.x, h.y);
+    ctx.restore();
+  });
+
+  // tired zzz
+  if (isTired) {
+    const zx = cx + 40, zy = cy - 55 + Math.sin(t) * 4;
+    ctx.save();
+    ctx.globalAlpha = 0.6;
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillStyle = '#89b4fa';
+    ctx.textAlign = 'center';
+    ctx.fillText('z z z', zx, zy);
+    ctx.restore();
+  }
+}
+
+function loop() {
+  drawCreature();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// ── Code peek ─────────────────────────────────────────────────────
+function updateCodePeek() {
+  const el = document.getElementById('code-peek-content');
+  const nm  = (state.name || 'My Creature').replace(/</g,'&lt;');
+  const col = state.color;
+  const f   = Math.round(state.food);
+  const h   = Math.round(state.happy);
+  const e   = Math.round(state.energy);
+  el.innerHTML =
+    `<span class="kw">let</span> name   = <span class="str">"${nm}"</span>;   <span class="cmt">// your creature's name</span>\n` +
+    `<span class="kw">let</span> color  = <span class="str">"${col}"</span>; <span class="cmt">// changes when you pick a color</span>\n\n` +
+    `<span class="kw">let</span> food   = <span class="num">${f}</span>;   <span class="cmt">// 0–100: how hungry it is</span>\n` +
+    `<span class="kw">let</span> happy  = <span class="num">${h}</span>;   <span class="cmt">// 0–100: how happy it is</span>\n` +
+    `<span class="kw">let</span> energy = <span class="num">${e}</span>;   <span class="cmt">// 0–100: how tired it is</span>\n\n` +
+    `<span class="cmt">// What happens when food runs out:</span>\n` +
+    `<span class="kw">if</span> (food &lt; <span class="num">25</span>) { creature.lookSad(); }\n\n` +
+    `<span class="cmt">// Special behavior: ${state.special}</span>\n` +
+    specialComment(state.special);
+}
+
+function specialComment(sp) {
+  const map = {
+    bounce: `<span class="kw">if</span> (happy &gt; <span class="num">70</span>) { creature.bounce(); }`,
+    glow:   `<span class="kw">if</span> (food &gt; <span class="num">80</span>) { creature.glow(); }`,
+    spin:   `<span class="kw">if</span> (petted) { creature.spin(); }`,
+    blink:  `<span class="kw">if</span> (energy &lt; <span class="num">25</span>) { creature.blinkFast(); }`,
+  };
+  return map[sp] || '';
+}
+
+function togglePeek() {
+  const box = document.getElementById('code-peek-box');
+  const btn = document.getElementById('peek-btn');
+  const open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) updateCodePeek();
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  const btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+updateCodePeek();
+
+
+function paintCreature(g, o) {
+  var col = o.color || '#7c4dff';
+  var mood = o.mood || 'neutral';   // happy | sad | tired | neutral
+  var t = o.t || 0;
+  g.save();
+  g.translate(o.x, o.y);
+  var s = o.scale || 1; g.scale(s, s);
+
+  var wobble = Math.sin(t * 1.4) * 2;
+
+  // body
+  g.beginPath();
+  g.ellipse(0, 0, 52 + wobble, 58 - wobble * 0.5, 0, 0, Math.PI * 2);
+  g.fillStyle = col; g.fill();
+
+  // belly
+  g.beginPath();
+  g.ellipse(0, 16, 30, 26, 0, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(255,255,255,0.16)'; g.fill();
+
+  // sheen
+  g.beginPath();
+  g.ellipse(-12, -16, 16, 12, -0.3, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(255,255,255,0.22)'; g.fill();
+
+  // sad cheeks (tear-shadow)
+  if (mood === 'sad') {
+    [[-22, 10], [22, 10]].forEach(function(pt) {
+      g.beginPath(); g.ellipse(pt[0], pt[1], 11, 7, 0, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(0,0,0,0.12)'; g.fill();
+    });
+  }
+  // happy blush
+  if (mood === 'happy') {
+    [[-24, 8], [24, 8]].forEach(function(pt) {
+      g.beginPath(); g.ellipse(pt[0], pt[1], 9, 6, 0, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(255,93,143,0.45)'; g.fill();
+    });
+  }
+
+  // eyes
+  var eyeY = -8;
+  var droopy = (mood === 'sad' || mood === 'tired');
+  var fullH = droopy ? 3 : 10;
+  var eyeH = o.blink ? 1.5 : fullH;
+  [[-18, eyeY], [18, eyeY]].forEach(function(pt) {
+    var ex = pt[0], ey = pt[1];
+    g.beginPath(); g.ellipse(ex, ey, 10, eyeH, 0, 0, Math.PI * 2);
+    g.fillStyle = 'white'; g.fill();
+    if (eyeH > 3) {
+      g.beginPath(); g.arc(ex + 2, ey + 1, 5, 0, Math.PI * 2);
+      g.fillStyle = '#231c3a'; g.fill();
+      g.beginPath(); g.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      g.fillStyle = 'white'; g.fill();
+    }
+  });
+
+  // mouth
+  g.beginPath();
+  g.strokeStyle = 'rgba(0,0,0,0.32)';
+  g.lineWidth = 2.5; g.lineCap = 'round';
+  if (mood === 'sad') {
+    g.arc(0, 30, 12, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (mood === 'happy') {
+    g.arc(0, 14, 14, 0.2, Math.PI - 0.2);
+  } else {
+    g.moveTo(-9, 22); g.lineTo(9, 22);
+  }
+  g.stroke();
+
+  g.restore();
+}
+
+/* ═══════════════ blink scheduler (shared) ═══════════════ */
+var blinking = 0, blinkCd = 90;
+function tickBlink() {
+  if (blinking > 0) { blinking--; }
+  else { blinkCd--; if (blinkCd <= 0) { blinking = 7; blinkCd = 130 + Math.floor(Math.random() * 200); } }
+}
+
+/* ═══════════════ header mascot ═══════════════ */
+(function mascot() {
+  var cv = document.getElementById('mascot');
+  if (!cv) return;
+  var g = cv.getContext('2d');
+  var W = cv.width, H = cv.height, mt = 0;
+  cv.addEventListener('click', function() { hop = 10; });
+  var hop = 0;
+  function loop() {
+    mt += 0.04; tickBlink();
+    if (hop > 0) hop -= 0.5;
+    g.clearRect(0, 0, W, H);
+    var bob = Math.sin(mt * 1.7) * 4 - (hop > 0 ? Math.sin((10 - hop) / 10 * Math.PI) * 16 : 0);
+    paintCreature(g, { x: W / 2, y: H / 2 + 14 + bob, scale: 0.72, mood: 'happy', t: mt, blink: blinking > 0, color: '#7c4dff' });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ═══════════════ emoji map ═══════════════ */
+var EMOJIS = [
+  '⭐','🍎','🍕','🍩','🎂','🍓','🥕','🌮',
+  '✨','💛','💜','❤️','💚','💙','🧡','🤍',
+  '💤','💫','🎵','🎉','🎈','🎁','🌈','☀️',
+  '🐾','🐟','🦋','🌸','🍄','🌙','⚡','🔥',
+  '😊','😴','🥺','😎','🤩','🥳','😋','🤔'
+];
+
+</script>
+</body>
+</html>

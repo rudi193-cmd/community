@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats and Decay — CS 5–7</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f7f4;
+    --surface: #ffffff;
+    --accent: #00897b;
+    --accent2: #ff7043;
+    --text: #2d2d2d;
+    --muted: #777;
+    --border: #e8e4de;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--accent);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  .grade-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .site-header h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .site-header p {
+    opacity: 0.88;
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Nav tabs ── */
+  .tab-bar {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.9rem 1rem;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-btn.locked {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+
+  /* ── Sections ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  /* ── Lesson content ── */
+  .lesson-content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  .lesson-content h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2rem 0 0.6rem;
+    color: var(--accent);
+  }
+  .lesson-content h2:first-child { margin-top: 0; }
+  .lesson-content p { margin-bottom: 1rem; }
+  .lesson-content ul {
+    margin: 0.5rem 0 1rem 1.4rem;
+  }
+  .lesson-content li { margin-bottom: 0.4rem; }
+
+  .callout {
+    background: #e0f2f1;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.2rem;
+    margin: 1.25rem 0;
+  }
+  .callout strong { color: var(--accent); }
+
+  .callout.warm {
+    background: #fbe9e7;
+    border-left-color: var(--accent2);
+  }
+  .callout.warm strong { color: var(--accent2); }
+
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .code-block .kw  { color: #cba6f7; }
+  .code-block .str { color: #a6e3a1; }
+  .code-block .num { color: #fab387; }
+  .code-block .cmt { color: #6c7086; }
+  .code-block .fn  { color: #89dceb; }
+
+  .big-question {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Sandbox ── */
+  .sandbox {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .sandbox { grid-template-columns: 1fr 1fr; }
+  }
+
+  .sandbox-stage {
+    background: #0d1117;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  canvas {
+    display: block;
+    border-radius: 8px;
+    background: #0d1117;
+  }
+  .stat-bars {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.7);
+  }
+  .stat-label { width: 52px; flex-shrink: 0; }
+  .stat-pct {
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.3s ease;
+  }
+  .stat-fill.food   { background: #4caf50; }
+  .stat-fill.happy  { background: #ffd54f; }
+  .stat-fill.energy { background: #42a5f5; }
+
+  .action-btns {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 0.55rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+  .action-btn:active { transform: scale(0.95); }
+  .btn-feed  { background: #4caf50; color: #0d1a0d; }
+  .btn-pet   { background: #ffd54f; color: #2a2000; }
+  .btn-sleep { background: #42a5f5; color: #001a2e; }
+
+  /* ── Controls panel ── */
+  .controls-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .controls-panel h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .control-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .control-group select {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .control-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    width: 42px;
+    text-align: right;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── Code peek ── */
+  .code-peek-section {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2.5rem;
+  }
+  .peek-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+    margin-bottom: 0.75rem;
+  }
+  .peek-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .peek-toggle .arrow { transition: transform 0.2s; margin-left: auto; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; }
+  #code-peek-box.open { display: block; }
+
+  /* ── Footer ── */
+  .lesson-footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+  .lesson-footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Ready button ── */
+  .ready-btn {
+    display: block;
+    width: 100%;
+    margin-top: 2.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .ready-btn:hover { background: #00695c; }
+  .ready-btn:active { transform: scale(0.98); }
+
+  /* ── Drain warning ── */
+  .drain-warning {
+    font-size: 0.78rem;
+    color: var(--accent2);
+    font-weight: 600;
+    min-height: 1.2em;
+    text-align: center;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="grade-tag">Grades 5–7 · Computer Science · 45–60 min</div>
+  <h1>Stats and Decay</h1>
+  <p>If nobody plays with your pet, what happens to it?</p>
+</header>
+
+<nav class="tab-bar" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept', this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-buildit" onclick="switchTab('buildit', this)" role="tab">Part 2 — Build It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="big-question">If nobody plays with your pet, what happens to it?</p>
+    <p>Think about a real pet — a dog left alone all day, a plant that hasn't been watered, a fish tank nobody checks. Things get worse on their own. The world drains things. That's not a bug — it's the whole point.</p>
+    <p>Today you're going to build the engine that makes a virtual pet feel alive: a decay loop that runs whether you're watching or not, and stat bars that show you exactly how things are going.</p>
+
+    <h2>Variables as stat containers</h2>
+    <p>Your creature has three stats — food, happy, and energy. Each one is a number from 0 to 100. Right now, before anything happens, you declare them:</p>
+
+    <div class="code-block">
+<span class="kw">let</span> food   = <span class="num">80</span>;  <span class="cmt">// 80 out of 100 — not hungry yet</span>
+<span class="kw">let</span> happy  = <span class="num">70</span>;  <span class="cmt">// 70 out of 100 — pretty happy</span>
+<span class="kw">let</span> energy = <span class="num">60</span>;  <span class="cmt">// 60 out of 100 — some energy left</span>
+    </div>
+
+    <p>Those three lines are a complete snapshot of how your creature is doing right now. They are the source of truth. Every bar on screen, every change in expression, every bit of behavior — it all comes from these three numbers.</p>
+    <p>When you feed the creature, <code>food</code> goes up. When it runs around, <code>energy</code> goes down. When you pet it, <code>happy</code> goes up. Simple rules, interesting results.</p>
+
+    <h2>setInterval — "do this every N milliseconds"</h2>
+    <p>Now here is the key question: how does food go down <em>on its own</em>, even if the player does nothing?</p>
+    <p>The answer is <code>setInterval</code>. It is a built-in JavaScript function that runs a block of code over and over again, on a timer. You tell it two things: what to do, and how long to wait between runs.</p>
+
+    <div class="code-block">
+<span class="fn">setInterval</span>(<span class="kw">function</span>() {
+  <span class="cmt">// this block runs every 5000 milliseconds (5 seconds)</span>
+  food   = <span class="fn">Math.max</span>(<span class="num">0</span>, food   - <span class="num">2</span>);
+  happy  = <span class="fn">Math.max</span>(<span class="num">0</span>, happy  - <span class="num">1</span>);
+  energy = <span class="fn">Math.max</span>(<span class="num">0</span>, energy - <span class="num">1.5</span>);
+}, <span class="num">5000</span>);  <span class="cmt">// 5000 ms = 5 seconds</span>
+    </div>
+
+    <p>Every five seconds, those three lines run. Food drops by 2. Happy drops by 1. Energy drops by 1.5. The creature is always getting a little worse, all by itself — unless you do something about it.</p>
+
+    <h2>Math.max(0, ...) — the safety floor</h2>
+    <p>Look at this part closely:</p>
+
+    <div class="code-block">
+food = <span class="fn">Math.max</span>(<span class="num">0</span>, food - <span class="num">2</span>);
+    </div>
+
+    <p>Why not just write <code>food = food - 2</code>? The problem is that subtraction keeps going. If food is 1 and you subtract 2, you get -1. Then -3. Then -5. Your bar would try to be -5% wide, which breaks everything.</p>
+    <p><code>Math.max(0, food - 2)</code> means: "take whichever is bigger — zero, or the result of food minus 2." So if food - 2 would be negative, you get 0 instead. The stat hits the floor and stays there.</p>
+
+    <div class="callout">
+      <strong>Why Math.max?</strong> <code>Math.max(0, food - 2)</code> makes sure the number never goes below zero. Without it, stats would go negative and your bars would break — or worse, they'd wrap around and show 100% when the creature is actually starving.
+    </div>
+
+    <h2>What happens at zero</h2>
+    <p>A number alone doesn't do anything. You have to write the code that <em>checks</em> the number and <em>does something</em> based on it. This is the draw loop — the part of the program that looks at the current stats and decides how to draw the creature.</p>
+
+    <div class="code-block">
+<span class="cmt">// inside the draw loop — runs ~60 times per second</span>
+<span class="kw">if</span> (food &lt; <span class="num">20</span>) {
+  <span class="cmt">// creature looks pale and droopy</span>
+  drawBlob(paleColor, droopyEyes);
+} <span class="kw">else if</span> (happy &gt; <span class="num">75</span>) {
+  <span class="cmt">// creature bounces and glows</span>
+  drawBlob(brightColor, bouncyOffset);
+} <span class="kw">else</span> {
+  <span class="cmt">// creature looks fine</span>
+  drawBlob(normalColor, neutralEyes);
+}
+    </div>
+
+    <p>Two separate loops run at the same time: the <code>setInterval</code> decay loop that changes the numbers every few seconds, and the <code>requestAnimationFrame</code> draw loop that reads those numbers and draws the creature up to 60 times per second. They never directly talk to each other — the shared variables are the messenger.</p>
+
+    <div class="callout warm">
+      <strong>The heart of every virtual pet:</strong> the decay loop is the heart of every virtual pet. The world drains things. You are the one who refills. That tension — drain vs. restore — is what makes a tamagotchi feel alive. Without decay, there is no reason to care.
+    </div>
+
+    <button class="ready-btn" onclick="unlockBuildit()">I'm ready to see it →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-buildit" class="tab-section">
+
+  <div class="sandbox">
+
+    <!-- Stage -->
+    <div class="sandbox-stage">
+      <canvas id="c" width="280" height="200"></canvas>
+      <div class="stat-bars">
+        <div class="stat-row">
+          <span class="stat-label">Food</span>
+          <div class="stat-track"><div class="stat-fill food" id="bar-food" style="width:80%"></div></div>
+          <span class="stat-pct" id="pct-food">80%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Happy</span>
+          <div class="stat-track"><div class="stat-fill happy" id="bar-happy" style="width:70%"></div></div>
+          <span class="stat-pct" id="pct-happy">70%</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Energy</span>
+          <div class="stat-track"><div class="stat-fill energy" id="bar-energy" style="width:60%"></div></div>
+          <span class="stat-pct" id="pct-energy">60%</span>
+        </div>
+      </div>
+      <div class="drain-warning" id="drain-warning"></div>
+      <div class="action-btns">
+        <button class="action-btn btn-feed"  onclick="doAction('feed')">Feed once</button>
+        <button class="action-btn btn-pet"   onclick="doAction('pet')">Pet once</button>
+        <button class="action-btn btn-sleep" onclick="doAction('rest')">Rest once</button>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-panel">
+      <h3>Watch it drain</h3>
+
+      <div class="control-group">
+        <label>Food drain <span class="slider-val" id="val-drain-food">2.0</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-drain-food" min="0.2" max="8" step="0.2" value="2">
+        </div>
+        <small style="color:var(--muted);font-size:0.78rem;">drain per tick</small>
+      </div>
+
+      <div class="control-group">
+        <label>Happy drain <span class="slider-val" id="val-drain-happy">1.0</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-drain-happy" min="0.2" max="8" step="0.2" value="1">
+        </div>
+        <small style="color:var(--muted);font-size:0.78rem;">drain per tick</small>
+      </div>
+
+      <div class="control-group">
+        <label>Energy drain <span class="slider-val" id="val-drain-energy">1.5</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-drain-energy" min="0.2" max="8" step="0.2" value="1.5">
+        </div>
+        <small style="color:var(--muted);font-size:0.78rem;">drain per tick</small>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="control-group">
+        <label for="ctrl-interval">Tick interval</label>
+        <select id="ctrl-interval">
+          <option value="1000">Every 1 second</option>
+          <option value="3000">Every 3 seconds</option>
+          <option value="5000" selected>Every 5 seconds</option>
+          <option value="10000">Every 10 seconds</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Code peek -->
+  <div class="code-peek-section">
+    <button class="peek-toggle" id="peek-btn" onclick="togglePeek()">
+      <span>Peek at the code</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div id="code-peek-box">
+      <div class="code-block" id="code-peek-content"></div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="lesson-footer">
+  Stats and Decay · Grades 5–7 · Computer Science ·
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────
+const state = {
+  food:    80,
+  happy:   70,
+  energy:  60,
+  // decay rates (drain per tick)
+  drainFood:   2,
+  drainHappy:  1,
+  drainEnergy: 1.5,
+  // animation
+  t:         0,
+  blinkT:    40,
+  blinkOpen: true,
+  bouncePhase: 0,
+  hearts: [],   // [{x, y, life}]
+  petting: 0,
+};
+
+// ── Canvas setup ───────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ── Decay interval management ──────────────────────────────────────
+let decayTimer = null;
+
+function startDecay(ms) {
+  if (decayTimer !== null) clearInterval(decayTimer);
+  decayTimer = setInterval(function() {
+    state.food   = Math.max(0, state.food   - state.drainFood);
+    state.happy  = Math.max(0, state.happy  - state.drainHappy);
+    state.energy = Math.max(0, state.energy - state.drainEnergy);
+    updateBars();
+    updateCodePeek();
+  }, ms);
+}
+
+// ── Controls wiring ────────────────────────────────────────────────
+function wireDrain(id, key, valId) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    state[key] = parseFloat(el.value);
+    document.getElementById(valId).textContent = parseFloat(el.value).toFixed(1);
+    updateCodePeek();
+  });
+}
+wireDrain('ctrl-drain-food',   'drainFood',   'val-drain-food');
+wireDrain('ctrl-drain-happy',  'drainHappy',  'val-drain-happy');
+wireDrain('ctrl-drain-energy', 'drainEnergy', 'val-drain-energy');
+
+document.getElementById('ctrl-interval').addEventListener('change', function() {
+  startDecay(parseInt(this.value, 10));
+  updateCodePeek();
+});
+
+// ── Stat bars ──────────────────────────────────────────────────────
+function updateBars() {
+  const f = Math.round(state.food);
+  const h = Math.round(state.happy);
+  const e = Math.round(state.energy);
+
+  document.getElementById('bar-food').style.width   = f + '%';
+  document.getElementById('bar-happy').style.width  = h + '%';
+  document.getElementById('bar-energy').style.width = e + '%';
+
+  document.getElementById('pct-food').textContent   = f + '%';
+  document.getElementById('pct-happy').textContent  = h + '%';
+  document.getElementById('pct-energy').textContent = e + '%';
+
+  // drain warning
+  const warn = document.getElementById('drain-warning');
+  const critical = [];
+  if (state.food   < 15) critical.push('starving');
+  if (state.happy  < 15) critical.push('miserable');
+  if (state.energy < 15) critical.push('exhausted');
+  warn.textContent = critical.length ? 'Warning: creature is ' + critical.join(' + ') + '!' : '';
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function doAction(action) {
+  if (action === 'feed') {
+    state.food  = Math.min(100, state.food  + 20);
+    state.happy = Math.min(100, state.happy + 3);
+  } else if (action === 'pet') {
+    state.happy  = Math.min(100, state.happy  + 15);
+    state.petting = 10;
+    spawnHearts(3);
+  } else if (action === 'rest') {
+    state.energy = Math.min(100, state.energy + 25);
+    state.food   = Math.max(0,   state.food   - 3);
+  }
+  updateBars();
+  updateCodePeek();
+}
+
+function spawnHearts(n) {
+  for (let i = 0; i < n; i++) {
+    state.hearts.push({
+      x: W / 2 + (Math.random() - 0.5) * 60,
+      y: H / 2 - 10 + (Math.random() - 0.5) * 30,
+      life: 1.0,
+    });
+  }
+}
+
+// ── Drawing ────────────────────────────────────────────────────────
+function drawCreature() {
+  const t = state.t;
+  state.t += 0.04;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // derived state flags
+  const isHungry  = state.food   < 25;
+  const isHappy   = state.happy  > 75;
+  const isTired   = state.energy < 25;
+  const isDesperate = state.food < 10 || state.happy < 10 || state.energy < 10;
+
+  // bounce when happy
+  let bounceY = 0;
+  if (isHappy) {
+    state.bouncePhase += 0.12;
+    bounceY = Math.abs(Math.sin(state.bouncePhase)) * -12;
+  } else {
+    state.bouncePhase = 0;
+  }
+
+  // slow wobble when tired
+  const wobbleSpeed = isTired ? 0.4 : 1.2;
+  const wobble = Math.sin(t * wobbleSpeed) * (isTired ? 1 : 2.5);
+
+  // blink logic
+  state.blinkT--;
+  if (state.blinkT <= 0) {
+    state.blinkOpen = !state.blinkOpen;
+    const slowBlink = isTired ? 12 : (25 + Math.random() * 20);
+    state.blinkT = state.blinkOpen ? slowBlink : 4;
+  }
+
+  const cx = W / 2;
+  const cy = H / 2 + 12 + bounceY;
+
+  // body color — pale when hungry
+  let bodyR = 0x00, bodyG = 0x89, bodyB = 0x7b;
+  if (isHungry) {
+    // desaturate toward grey
+    const blend = (25 - state.food) / 25;
+    const grey = 0x88;
+    bodyR = Math.round(bodyR + (grey - bodyR) * blend);
+    bodyG = Math.round(bodyG + (grey - bodyG) * blend);
+    bodyB = Math.round(bodyB + (grey - bodyB) * blend);
+  }
+  const bodyColor = `rgb(${bodyR},${bodyG},${bodyB})`;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // body blob
+  const bw = 58 + wobble;
+  const bh = 64 - wobble * 0.4;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, bw, bh, 0, 0, Math.PI * 2);
+  ctx.fillStyle = bodyColor;
+  ctx.fill();
+
+  // sheen
+  ctx.beginPath();
+  ctx.ellipse(-12, -16, 18, 13, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fill();
+
+  // droopy marks when hungry
+  if (isHungry) {
+    [[-24, 10], [24, 10]].forEach(function(pair) {
+      ctx.beginPath();
+      ctx.ellipse(pair[0], pair[1], 11, 7, pair[0] < 0 ? 0.4 : -0.4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.13)';
+      ctx.fill();
+    });
+  }
+
+  // eye openness: half-closed when tired, normal otherwise
+  const eyeH = isTired ? 4 : 10;
+  [[-20, -10], [20, -10]].forEach(function(pair) {
+    var ex = pair[0], ey = pair[1];
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 11, state.blinkOpen ? eyeH : 2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    if (state.blinkOpen && eyeH > 2) {
+      ctx.beginPath();
+      ctx.arc(ex + 2, ey + 1, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#0d1117';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+  });
+
+  // mouth
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  if (isHungry) {
+    // sad arc
+    ctx.arc(0, 30, 13, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (isHappy) {
+    // big smile
+    ctx.arc(0, 18, 16, 0.18, Math.PI - 0.18);
+  } else {
+    // neutral line
+    ctx.moveTo(-10, 24);
+    ctx.lineTo(10, 24);
+  }
+  ctx.stroke();
+
+  // blush when petted
+  if (state.petting > 0) {
+    state.petting--;
+    const ba = state.petting / 10;
+    [[-26, 16], [26, 16]].forEach(function(pair) {
+      ctx.beginPath();
+      ctx.ellipse(pair[0], pair[1], 12, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,120,80,' + (ba * 0.55) + ')';
+      ctx.fill();
+    });
+  }
+
+  ctx.restore();
+
+  // tired zzz
+  if (isTired) {
+    const zx = cx + 46;
+    const zy = cy - 64 + Math.sin(t) * 5;
+    ctx.save();
+    ctx.globalAlpha = 0.55 + Math.sin(t * 1.5) * 0.2;
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillStyle = '#42a5f5';
+    ctx.textAlign = 'center';
+    ctx.fillText('z z z', zx, zy);
+    ctx.restore();
+  }
+
+  // desperate flash
+  if (isDesperate) {
+    const alpha = 0.08 + Math.abs(Math.sin(t * 4)) * 0.08;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#ff7043';
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+
+  // floating hearts
+  state.hearts = state.hearts.filter(function(h) { return h.life > 0; });
+  state.hearts.forEach(function(h) {
+    h.y   -= 1.3;
+    h.life -= 0.045;
+    ctx.save();
+    ctx.globalAlpha = h.life;
+    ctx.font = '17px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('♥', h.x, h.y);
+    ctx.restore();
+  });
+}
+
+function animLoop() {
+  drawCreature();
+  requestAnimationFrame(animLoop);
+}
+animLoop();
+
+// ── Code peek ─────────────────────────────────────────────────────
+function updateCodePeek() {
+  const el = document.getElementById('code-peek-content');
+  if (!el) return;
+
+  const df = state.drainFood.toFixed(1);
+  const dh = state.drainHappy.toFixed(1);
+  const de = state.drainEnergy.toFixed(1);
+  const ms = parseInt(document.getElementById('ctrl-interval').value, 10);
+
+  el.innerHTML =
+    '<span class="cmt">// ── Stat declarations ─────────────────────────</span>\n' +
+    '<span class="kw">let</span> food   = <span class="num">' + Math.round(state.food)   + '</span>;  <span class="cmt">// 0–100</span>\n' +
+    '<span class="kw">let</span> happy  = <span class="num">' + Math.round(state.happy)  + '</span>;  <span class="cmt">// 0–100</span>\n' +
+    '<span class="kw">let</span> energy = <span class="num">' + Math.round(state.energy) + '</span>;  <span class="cmt">// 0–100</span>\n\n' +
+    '<span class="cmt">// ── Decay loop — runs every ' + ms + ' ms ──────────</span>\n' +
+    '<span class="fn">setInterval</span>(<span class="kw">function</span>() {\n' +
+    '  food   = <span class="fn">Math.max</span>(<span class="num">0</span>, food   - <span class="num">' + df + '</span>);\n' +
+    '  happy  = <span class="fn">Math.max</span>(<span class="num">0</span>, happy  - <span class="num">' + dh + '</span>);\n' +
+    '  energy = <span class="fn">Math.max</span>(<span class="num">0</span>, energy - <span class="num">' + de + '</span>);\n' +
+    '}, <span class="num">' + ms + '</span>);\n\n' +
+    '<span class="cmt">// ── Draw loop — reads stats, changes look ──────</span>\n' +
+    '<span class="kw">function</span> <span class="fn">draw</span>() {\n' +
+    '  <span class="kw">if</span> (food &lt; <span class="num">20</span>) {\n' +
+    '    <span class="cmt">// pale color, droopy eyes, sad mouth</span>\n' +
+    '  } <span class="kw">else if</span> (happy &gt; <span class="num">75</span>) {\n' +
+    '    <span class="cmt">// bouncy offset, bright color</span>\n' +
+    '  }\n' +
+    '  <span class="kw">if</span> (energy &lt; <span class="num">25</span>) {\n' +
+    '    <span class="cmt">// half-closed eyes, slow wobble, zzz</span>\n' +
+    '  }\n' +
+    '  <span class="fn">requestAnimationFrame</span>(draw);\n' +
+    '}';
+}
+
+function togglePeek() {
+  const box = document.getElementById('code-peek-box');
+  const btn = document.getElementById('peek-btn');
+  const open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) updateCodePeek();
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockBuildit() {
+  const btn = document.getElementById('tab-btn-buildit');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('buildit', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+startDecay(5000);
+updateBars();
+updateCodePeek();
+</script>
+</body>
+</html>
