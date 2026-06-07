@@ -15,7 +15,7 @@ That's a direct quote. The phonetic spelling is part of the record.
 
 The kid had been watching Star — a pixel axolotl living in a browser tab — eat pixel fish and write letters to her friends. She wanted to carry Star around in her pocket. She wanted to *build* that. She didn't know what a Tamagotchi was by name, but she knew what she wanted.
 
-That request became six months of sessions, four pets, a shared mail network, a 2×2 hub dashboard, and eventually a hardware watch where the same axolotl runs as C++ on a microcontroller.
+That request became a fun weekend project, four pets, a shared mail network, a 2×2 hub dashboard, and eventually a hardware watch where the same axolotl runs as C++ on a microcontroller.
 
 This is the record of how that happened — what worked, what surprised us, and what another educator might replicate.
 
