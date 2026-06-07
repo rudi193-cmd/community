@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Save Your Pet — CS 5–7</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f7f4;
+    --surface: #ffffff;
+    --accent: #1565c0;
+    --accent2: #f57c00;
+    --text: #2d2d2d;
+    --muted: #777;
+    --border: #e8e4de;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--accent);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  .grade-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .site-header h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .site-header p {
+    opacity: 0.88;
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Nav tabs ── */
+  .tab-bar {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.9rem 1rem;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-btn.locked {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+
+  /* ── Sections ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  /* ── Lesson content ── */
+  .lesson-content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  .lesson-content h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2rem 0 0.6rem;
+    color: var(--accent);
+  }
+  .lesson-content h2:first-child { margin-top: 0; }
+  .lesson-content p { margin-bottom: 1rem; }
+  .lesson-content ul {
+    margin: 0.5rem 0 1rem 1.4rem;
+  }
+  .lesson-content li { margin-bottom: 0.4rem; }
+
+  .callout {
+    background: #e3f0ff;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.2rem;
+    margin: 1.25rem 0;
+  }
+  .callout strong { color: var(--accent); }
+
+  .callout.warn {
+    background: #fff3e0;
+    border-left-color: var(--accent2);
+  }
+  .callout.warn strong { color: var(--accent2); }
+
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .code-block .kw  { color: #cba6f7; }
+  .code-block .str { color: #a6e3a1; }
+  .code-block .num { color: #fab387; }
+  .code-block .cmt { color: #6c7086; }
+  .code-block .fn  { color: #89dceb; }
+
+  .big-question {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Sandbox ── */
+  .sandbox {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .sandbox { grid-template-columns: 1fr 1fr; }
+  }
+
+  .sandbox-stage {
+    background: #1a1a2e;
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  canvas {
+    display: block;
+    border-radius: 8px;
+    background: #16213e;
+  }
+  .stat-bars {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.7);
+  }
+  .stat-label { width: 52px; flex-shrink: 0; }
+  .stat-val {
+    width: 28px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+  }
+  .stat-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .stat-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.3s ease;
+  }
+  .stat-fill.food   { background: #a6e3a1; }
+  .stat-fill.happy  { background: #f9e2af; }
+  .stat-fill.energy { background: #89b4fa; }
+
+  .action-btns {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .action-btn {
+    flex: 1;
+    padding: 0.55rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+  .action-btn:active { transform: scale(0.95); }
+  .btn-feed  { background: #a6e3a1; color: #1a2e1a; }
+  .btn-play  { background: #f9e2af; color: #2e2a1a; }
+  .btn-rest  { background: #89b4fa; color: #1a1e2e; }
+
+  /* ── Storage panel ── */
+  .storage-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .storage-panel h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .save-btns {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .save-btn {
+    flex: 1;
+    padding: 0.55rem 0.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.15s;
+  }
+  .save-btn:active { transform: scale(0.95); }
+  .btn-save  { background: var(--accent); color: white; }
+  .btn-load  { background: #43a047; color: white; }
+  .btn-clear { background: #e53935; color: white; }
+
+  .inspector-box {
+    background: #1e1e2e;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+  }
+  .inspector-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .inspector-value {
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.8rem;
+    color: #a6e3a1;
+    word-break: break-all;
+    line-height: 1.5;
+    min-height: 2.4em;
+  }
+  .inspector-value.empty {
+    color: #6c7086;
+    font-style: italic;
+  }
+
+  .status-msg {
+    font-size: 0.88rem;
+    font-weight: 700;
+    min-height: 1.4em;
+    text-align: center;
+    transition: opacity 0.3s;
+  }
+  .status-msg.saved  { color: var(--accent); }
+  .status-msg.loaded { color: #43a047; }
+  .status-msg.cleared { color: #e53935; }
+
+  .autosave-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── Sandbox note ── */
+  .sandbox-note {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 1.5rem 0;
+  }
+  .sandbox-note .callout {
+    background: #e3f0ff;
+    border-left-color: var(--accent);
+  }
+
+  /* ── Code peek ── */
+  .code-peek-section {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2.5rem;
+  }
+  .peek-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+    margin-bottom: 0.75rem;
+  }
+  .peek-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .peek-toggle .arrow { transition: transform 0.2s; margin-left: auto; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; }
+  #code-peek-box.open { display: block; }
+
+  /* ── Footer ── */
+  .lesson-footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+  .lesson-footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Ready button ── */
+  .ready-btn {
+    display: block;
+    width: 100%;
+    margin-top: 2.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .ready-btn:hover { background: #1976d2; }
+  .ready-btn:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="grade-tag">Grades 5–7 · Computer Science · 45–60 min</div>
+  <h1>Save Your Pet</h1>
+  <p>What happens to your pet when you close the tab?</p>
+</header>
+
+<nav class="tab-bar" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept', this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-buildit" onclick="switchTab('buildit', this)" role="tab">Part 2 — Build It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="big-question">What happens to your pet when you close the tab?</p>
+    <p>Your pet's stats — food, happy, energy — live in the computer's memory while the page is open. Memory is fast. But it has one serious problem: when the tab closes, it's gone. Everything resets to zero. Your pet forgets it ever existed.</p>
+    <p>Today you'll learn how to rescue your pet from this fate by writing its stats to a place that actually sticks around.</p>
+
+    <h2>Memory vs. persistent storage</h2>
+    <p>Here's the difference:</p>
+    <ul>
+      <li><strong>Memory (RAM)</strong> — blazing fast, but wiped when the page closes. Variables live here.</li>
+      <li><strong>Persistent storage</strong> — written to disk. Survives tab closes, browser restarts, and reboots. Much slower to read and write, but the data stays put.</li>
+    </ul>
+    <p>Your browser gives every webpage a small built-in notebook called <strong>localStorage</strong>. It's persistent storage you can reach with two simple functions.</p>
+
+    <div class="callout">
+      <strong>localStorage survives tab closes, browser restarts, and reboots.</strong> It's not in memory — it's written to disk. The data will still be there a week from now.
+    </div>
+
+    <h2>setItem and getItem — the browser's notebook</h2>
+    <p>You write to localStorage with <code>setItem</code> and read it back with <code>getItem</code>. Both take a key — like a label on a jar — and <code>setItem</code> takes a value too.</p>
+
+    <div class="code-block">
+      <span class="cmt">// Write a value</span><br>
+      localStorage.<span class="fn">setItem</span>(<span class="str">'petFood'</span>, <span class="str">'80'</span>);<br>
+      <br>
+      <span class="cmt">// Read it back later (even after a page reload)</span><br>
+      <span class="kw">const</span> saved = localStorage.<span class="fn">getItem</span>(<span class="str">'petFood'</span>);<br>
+      console.<span class="fn">log</span>(saved); <span class="cmt">// '80'  ← notice: a string, not a number</span>
+    </div>
+
+    <h2>Why values must be strings</h2>
+    <p>localStorage can only store text. It doesn't know about numbers, booleans, or objects — everything goes in as a string and comes back as a string. This causes a trap that catches almost everyone the first time.</p>
+
+    <div class="callout warn">
+      <strong>'80' and 80 look the same but aren't.</strong><br>
+      <code>'80' + 20 = '8020'</code> — JavaScript sees two strings and glues them together.<br>
+      <code>parseFloat('80') + 20 = 100</code> — converting first gives you real math.<br>
+      Always convert back after reading from localStorage.
+    </div>
+
+    <p>The fix is <strong>parseFloat</strong> (or <strong>parseInt</strong> for whole numbers). Call it immediately after <code>getItem</code> so the rest of your code never sees a string where it expects a number.</p>
+
+    <div class="code-block">
+      <span class="cmt">// Save a number</span><br>
+      localStorage.<span class="fn">setItem</span>(<span class="str">'petFood'</span>, <span class="num">80</span>);<br>
+      <br>
+      <span class="cmt">// Load it back as a real number</span><br>
+      <span class="kw">const</span> food = <span class="fn">parseFloat</span>(localStorage.<span class="fn">getItem</span>(<span class="str">'petFood'</span>));<br>
+      food + <span class="num">20</span>; <span class="cmt">// 100 ✓ — actual addition, not string glue</span>
+    </div>
+
+    <h2>Saving and loading a full pet — JSON</h2>
+    <p>Your pet has three stats. You could save each one separately with its own key. That works, but it's messy — three separate saves, three separate loads, three places to forget one.</p>
+    <p>A cleaner approach: bundle the whole pet into a single <strong>object</strong>, then convert it to a string with <strong>JSON.stringify</strong>, and convert it back with <strong>JSON.parse</strong>.</p>
+
+    <div class="code-block">
+      <span class="cmt">// Bundle the stats into one object and stringify it</span><br>
+      <span class="kw">function</span> <span class="fn">save</span>() {<br>
+      &nbsp;&nbsp;<span class="kw">const</span> data = { food: pet.food, happy: pet.happy, energy: pet.energy };<br>
+      &nbsp;&nbsp;localStorage.<span class="fn">setItem</span>(<span class="str">'lesson-pet-stats'</span>, JSON.<span class="fn">stringify</span>(data));<br>
+      }<br>
+      <br>
+      <span class="cmt">// Read the string back and parse it into a real object</span><br>
+      <span class="kw">function</span> <span class="fn">load</span>() {<br>
+      &nbsp;&nbsp;<span class="kw">const</span> raw = localStorage.<span class="fn">getItem</span>(<span class="str">'lesson-pet-stats'</span>);<br>
+      &nbsp;&nbsp;<span class="kw">if</span> (!raw) <span class="kw">return</span>; <span class="cmt">// nothing saved yet — bail out</span><br>
+      &nbsp;&nbsp;<span class="kw">const</span> data = JSON.<span class="fn">parse</span>(raw);<br>
+      &nbsp;&nbsp;pet.food   = <span class="fn">parseFloat</span>(data.food);<br>
+      &nbsp;&nbsp;pet.happy  = <span class="fn">parseFloat</span>(data.happy);<br>
+      &nbsp;&nbsp;pet.energy = <span class="fn">parseFloat</span>(data.energy);<br>
+      }
+    </div>
+
+    <p>JSON.stringify turns <code>{ food: 80, happy: 70, energy: 50 }</code> into the string <code>'{"food":80,"happy":70,"energy":50}'</code>. JSON.parse does the reverse. The numbers stay numbers — no parseFloat needed this time, because JSON knows about number types. But it doesn't hurt to use parseFloat anyway as a safety net.</p>
+
+    <h2>When to save</h2>
+    <p>You have two choices — and most real games use both at once:</p>
+    <ul>
+      <li><strong>On every action</strong> — call <code>save()</code> immediately when the player feeds, plays, or rests. No data is ever more than one action old.</li>
+      <li><strong>On a timer</strong> — use <code>setInterval(save, 10000)</code> to save every 10 seconds automatically, even if the player just watches.</li>
+    </ul>
+
+    <div class="code-block">
+      <span class="cmt">// Auto-save every 10 seconds</span><br>
+      <span class="fn">setInterval</span>(save, <span class="num">10000</span>);<br>
+      <br>
+      <span class="cmt">// Also save immediately on any action</span><br>
+      <span class="kw">function</span> <span class="fn">feed</span>() {<br>
+      &nbsp;&nbsp;pet.food = Math.<span class="fn">min</span>(<span class="num">100</span>, pet.food + <span class="num">20</span>);<br>
+      &nbsp;&nbsp;<span class="fn">save</span>(); <span class="cmt">// right here — don't wait for the interval</span><br>
+      }
+    </div>
+
+    <p>When you're ready, click the button below to try it yourself.</p>
+
+    <button class="ready-btn" onclick="unlockBuildIt()">I get it — let me try it →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-buildit" class="tab-section">
+
+  <div class="sandbox">
+
+    <!-- Stage -->
+    <div class="sandbox-stage">
+      <canvas id="c" width="260" height="180"></canvas>
+      <div class="stat-bars">
+        <div class="stat-row">
+          <span class="stat-label">Food</span>
+          <div class="stat-track"><div class="stat-fill food" id="bar-food" style="width:75%"></div></div>
+          <span class="stat-val" id="val-food">75</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Happy</span>
+          <div class="stat-track"><div class="stat-fill happy" id="bar-happy" style="width:65%"></div></div>
+          <span class="stat-val" id="val-happy">65</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Energy</span>
+          <div class="stat-track"><div class="stat-fill energy" id="bar-energy" style="width:55%"></div></div>
+          <span class="stat-val" id="val-energy">55</span>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button class="action-btn btn-feed" onclick="doAction('feed')">🍎 Feed</button>
+        <button class="action-btn btn-play" onclick="doAction('play')">⚽ Play</button>
+        <button class="action-btn btn-rest" onclick="doAction('rest')">💤 Rest</button>
+      </div>
+    </div>
+
+    <!-- Storage panel -->
+    <div class="storage-panel">
+      <h3>Save / Load Demo</h3>
+
+      <div class="save-btns">
+        <button class="save-btn btn-save"  onclick="doSave()">💾 Save</button>
+        <button class="save-btn btn-load"  onclick="doLoad()">📂 Load</button>
+        <button class="save-btn btn-clear" onclick="doClear()">🗑️ Clear</button>
+      </div>
+
+      <div>
+        <div class="inspector-label">Storage Inspector — raw localStorage value</div>
+        <div class="inspector-box">
+          <div class="inspector-value empty" id="inspector-value">(nothing saved yet)</div>
+        </div>
+      </div>
+
+      <div class="status-msg" id="status-msg"></div>
+      <div class="autosave-note" id="autosave-note">Auto-save active — saves every 10 seconds</div>
+    </div>
+
+  </div>
+
+  <!-- Instruction callout -->
+  <div class="sandbox-note">
+    <div class="callout">
+      Try changing the stats with the action buttons, then click <strong>Save</strong>. Then click <strong>Clear</strong>, refresh the page, and click <strong>Load</strong> — your stats come back exactly where you left them.
+    </div>
+  </div>
+
+  <!-- Code peek -->
+  <div class="code-peek-section">
+    <button class="peek-toggle" id="peek-btn" onclick="togglePeek()">
+      <span>💾 Peek at the save() and load() functions</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div id="code-peek-box">
+      <div class="code-block">
+<span class="kw">function</span> <span class="fn">save</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> data = {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;food:   pet.food,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;happy:  pet.happy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;energy: pet.energy,<br>
+&nbsp;&nbsp;};<br>
+&nbsp;&nbsp;localStorage.<span class="fn">setItem</span>(<span class="str">'lesson-pet-stats'</span>, JSON.<span class="fn">stringify</span>(data));<br>
+}<br>
+<br>
+<span class="kw">function</span> <span class="fn">load</span>() {<br>
+&nbsp;&nbsp;<span class="kw">const</span> raw = localStorage.<span class="fn">getItem</span>(<span class="str">'lesson-pet-stats'</span>);<br>
+&nbsp;&nbsp;<span class="kw">if</span> (!raw) <span class="kw">return</span>; <span class="cmt">// nothing saved — stop here</span><br>
+&nbsp;&nbsp;<span class="kw">const</span> data = JSON.<span class="fn">parse</span>(raw);<br>
+&nbsp;&nbsp;pet.food   = <span class="fn">parseFloat</span>(data.food);<br>
+&nbsp;&nbsp;pet.happy  = <span class="fn">parseFloat</span>(data.happy);<br>
+&nbsp;&nbsp;pet.energy = <span class="fn">parseFloat</span>(data.energy);<br>
+}<br>
+<br>
+<span class="cmt">// Auto-save on a timer</span><br>
+<span class="fn">setInterval</span>(save, <span class="num">10000</span>);<br>
+<br>
+<span class="cmt">// Also save on every action</span><br>
+<span class="kw">function</span> <span class="fn">doAction</span>(action) {<br>
+&nbsp;&nbsp;<span class="cmt">// ... update stats ...</span><br>
+&nbsp;&nbsp;<span class="fn">save</span>(); <span class="cmt">// never wait for the timer</span><br>
+}
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="lesson-footer">
+  Save Your Pet · Grades 5–7 · Computer Science ·
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ── Pet state ──────────────────────────────────────────────────────
+const pet = {
+  food:   75,
+  happy:  65,
+  energy: 55,
+  // animation
+  t:          0,
+  bounce:     0,
+  blinkT:     40,
+  blinkOpen:  true,
+  hearts:     [],
+  petting:    0,
+};
+
+// ── Canvas ─────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ── Stat bars ──────────────────────────────────────────────────────
+function updateBars() {
+  const f = Math.round(pet.food);
+  const h = Math.round(pet.happy);
+  const e = Math.round(pet.energy);
+  document.getElementById('bar-food').style.width   = f + '%';
+  document.getElementById('bar-happy').style.width  = h + '%';
+  document.getElementById('bar-energy').style.width = e + '%';
+  document.getElementById('val-food').textContent   = f;
+  document.getElementById('val-happy').textContent  = h;
+  document.getElementById('val-energy').textContent = e;
+}
+
+// ── Actions ────────────────────────────────────────────────────────
+function doAction(action) {
+  if (action === 'feed') {
+    pet.food   = Math.min(100, pet.food   + 20);
+    pet.happy  = Math.min(100, pet.happy  + 5);
+  } else if (action === 'play') {
+    pet.happy  = Math.min(100, pet.happy  + 15);
+    pet.energy = Math.max(0,   pet.energy - 10);
+    pet.petting = 8;
+    spawnHearts(3);
+  } else if (action === 'rest') {
+    pet.energy = Math.min(100, pet.energy + 25);
+    pet.food   = Math.max(0,   pet.food   - 5);
+  }
+  updateBars();
+  save();
+}
+
+function spawnHearts(n) {
+  for (let i = 0; i < n; i++) {
+    pet.hearts.push({
+      x:    W / 2 + (Math.random() - 0.5) * 60,
+      y:    H / 2 - 20 + (Math.random() - 0.5) * 20,
+      life: 1.0,
+    });
+  }
+}
+
+// ── Decay ──────────────────────────────────────────────────────────
+let lastDecay = Date.now();
+function applyDecay() {
+  const now  = Date.now();
+  const mins = (now - lastDecay) / 60000;
+  lastDecay  = now;
+  pet.food   = Math.max(0, pet.food   - mins * 4);
+  pet.happy  = Math.max(0, pet.happy  - mins * 3);
+  pet.energy = Math.max(0, pet.energy - mins * 2);
+  updateBars();
+}
+setInterval(applyDecay, 8000);
+
+// ── Save / Load / Clear ────────────────────────────────────────────
+function save() {
+  const data = { food: pet.food, happy: pet.happy, energy: pet.energy };
+  localStorage.setItem('lesson-pet-stats', JSON.stringify(data));
+  refreshInspector();
+}
+
+function load() {
+  const raw = localStorage.getItem('lesson-pet-stats');
+  if (!raw) return false;
+  const data   = JSON.parse(raw);
+  pet.food   = parseFloat(data.food);
+  pet.happy  = parseFloat(data.happy);
+  pet.energy = parseFloat(data.energy);
+  updateBars();
+  return true;
+}
+
+function refreshInspector() {
+  const raw = localStorage.getItem('lesson-pet-stats');
+  const el  = document.getElementById('inspector-value');
+  if (raw) {
+    el.textContent = raw;
+    el.classList.remove('empty');
+  } else {
+    el.textContent = '(nothing saved yet)';
+    el.classList.add('empty');
+  }
+}
+
+// ── Button handlers ────────────────────────────────────────────────
+let statusTimer = null;
+function showStatus(text, cls) {
+  const el = document.getElementById('status-msg');
+  el.textContent = text;
+  el.className   = 'status-msg ' + cls;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => {
+    el.textContent = '';
+    el.className   = 'status-msg';
+  }, 2000);
+}
+
+function doSave() {
+  save();
+  showStatus('Saved!', 'saved');
+}
+
+function doLoad() {
+  const ok = load();
+  if (ok) {
+    showStatus('Loaded!', 'loaded');
+  } else {
+    showStatus('Nothing saved yet — click Save first.', 'cleared');
+  }
+}
+
+function doClear() {
+  localStorage.removeItem('lesson-pet-stats');
+  refreshInspector();
+  showStatus('Cleared!', 'cleared');
+}
+
+// ── Auto-save every 10 seconds ─────────────────────────────────────
+setInterval(() => {
+  save();
+  showStatus('Auto-saved!', 'saved');
+}, 10000);
+
+// ── Drawing ────────────────────────────────────────────────────────
+function drawPet() {
+  pet.t += 0.04;
+  const t = pet.t;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const isHappy  = pet.happy  > 65;
+  const isSad    = pet.food   < 25 || pet.happy < 25;
+  const isTired  = pet.energy < 25;
+
+  // blink
+  pet.blinkT--;
+  if (pet.blinkT <= 0) {
+    pet.blinkOpen = !pet.blinkOpen;
+    pet.blinkT    = pet.blinkOpen ? (40 + Math.random() * 30) : 5;
+  }
+
+  // bounce when happy
+  const bounceY = isHappy ? Math.abs(Math.sin(t * 3)) * -8 : 0;
+
+  const cx = W / 2;
+  const cy = H / 2 + 8 + bounceY;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // body blob
+  const wobble = Math.sin(t * 1.3) * 2.5;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 50 + wobble, 56 - wobble * 0.5, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#1565c0';
+  ctx.fill();
+
+  // sheen
+  ctx.beginPath();
+  ctx.ellipse(-12, -14, 16, 12, -0.3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.16)';
+  ctx.fill();
+
+  // sad droop
+  if (isSad) {
+    [[-20, 6], [20, 6]].forEach(([bx, by]) => {
+      ctx.beginPath();
+      ctx.ellipse(bx, by, 9, 6, bx < 0 ? 0.4 : -0.4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.13)';
+      ctx.fill();
+    });
+  }
+
+  // eyes
+  const eyeOpenH = isTired ? 3 : 9;
+  [[-17, -7], [17, -7]].forEach(([ex, ey]) => {
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, 9, pet.blinkOpen ? eyeOpenH : 2, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    if (pet.blinkOpen) {
+      ctx.beginPath();
+      ctx.arc(ex + 2, ey + 1, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#0d1b3e';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 3.5, ey - 0.5, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    }
+  });
+
+  // mouth
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  if (isSad) {
+    ctx.arc(0, 28, 11, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (isHappy) {
+    ctx.arc(0, 17, 13, 0.2, Math.PI - 0.2);
+  } else {
+    ctx.moveTo(-9, 22);
+    ctx.lineTo(9, 22);
+  }
+  ctx.stroke();
+
+  // blush when playing
+  if (pet.petting > 0) {
+    pet.petting--;
+    const ba = pet.petting / 8;
+    [[-22, 12], [22, 12]].forEach(([bx, by]) => {
+      ctx.beginPath();
+      ctx.ellipse(bx, by, 10, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,160,160,${ba * 0.5})`;
+      ctx.fill();
+    });
+  }
+
+  ctx.restore();
+
+  // floating hearts
+  pet.hearts = pet.hearts.filter(h => h.life > 0);
+  pet.hearts.forEach(h => {
+    h.y    -= 1.2;
+    h.life -= 0.04;
+    ctx.save();
+    ctx.globalAlpha  = h.life;
+    ctx.font         = '15px serif';
+    ctx.textAlign    = 'center';
+    ctx.fillStyle    = '#f9e2af';
+    ctx.fillText('♥', h.x, h.y);
+    ctx.restore();
+  });
+
+  // zzz when tired
+  if (isTired) {
+    const zx = cx + 38, zy = cy - 52 + Math.sin(t) * 4;
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.font        = 'bold 13px sans-serif';
+    ctx.fillStyle   = '#89b4fa';
+    ctx.textAlign   = 'center';
+    ctx.fillText('z z z', zx, zy);
+    ctx.restore();
+  }
+}
+
+function loop() {
+  drawPet();
+  requestAnimationFrame(loop);
+}
+loop();
+
+// ── Code peek ──────────────────────────────────────────────────────
+function togglePeek() {
+  const box = document.getElementById('code-peek-box');
+  const btn = document.getElementById('peek-btn');
+  const open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+// ── Tab switching ──────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockBuildIt() {
+  const btn = document.getElementById('tab-btn-buildit');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('buildit', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+refreshInspector();
+</script>
+</body>
+</html>

@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hub — CS 6–8</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f9f7f4;
+    --surface: #ffffff;
+    --accent: #c62828;
+    --accent2: #f9a825;
+    --text: #2d2d2d;
+    --muted: #777;
+    --border: #e8e4de;
+    --radius: 12px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--accent);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  .grade-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 100px;
+    padding: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .site-header h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .site-header p {
+    opacity: 0.88;
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Nav tabs ── */
+  .tab-bar {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.9rem 1rem;
+    border: none;
+    background: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-btn.locked {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+
+  /* ── Sections ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  /* ── Lesson content ── */
+  .lesson-content {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  .lesson-content h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2rem 0 0.6rem;
+    color: var(--accent);
+  }
+  .lesson-content h2:first-child { margin-top: 0; }
+  .lesson-content p { margin-bottom: 1rem; }
+  .lesson-content ul {
+    margin: 0.5rem 0 1rem 1.4rem;
+  }
+  .lesson-content li { margin-bottom: 0.4rem; }
+
+  .callout {
+    background: #fdecea;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.2rem;
+    margin: 1.25rem 0;
+  }
+  .callout strong { color: var(--accent); }
+
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .code-block .kw  { color: #cba6f7; }
+  .code-block .str { color: #a6e3a1; }
+  .code-block .num { color: #fab387; }
+  .code-block .cmt { color: #6c7086; }
+  .code-block .prop { color: #89dceb; }
+  .code-block .val { color: #f38ba8; }
+
+  .big-question {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Build tab layout ── */
+  .build-content {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  .build-content h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 1.8rem 0 0.6rem;
+  }
+  .build-content h2:first-child { margin-top: 0; }
+  .build-content p { margin-bottom: 0.9rem; }
+
+  /* ── Hub grid ── */
+  .hub-container {
+    background: #111;
+    border-radius: var(--radius);
+    padding: 12px;
+    margin: 1rem 0;
+  }
+  #pet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+  }
+  .pet-cell {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .pet-cell:hover { transform: scale(1.02); }
+  .pet-cell canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    background: #16213e;
+  }
+  .pet-cell .cell-label {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    pointer-events: none;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .cell-star   { border: 2px solid #2a4060; }
+  .cell-ivy    { border: 2px solid #3a2060; }
+  .cell-astro  { border: 2px solid #40202a; }
+  .cell-gerald { border: 2px solid #3a3020; }
+
+  /* ── Expanded overlay ── */
+  #overlay-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  #overlay-backdrop.open { display: flex; }
+  #overlay-close {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    z-index: 110;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background 0.15s;
+  }
+  #overlay-close.open { display: flex; }
+  #overlay-close:hover { background: rgba(255,255,255,0.28); }
+  #overlay-box {
+    background: #1a1a2e;
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    text-align: center;
+  }
+  #overlay-title {
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  #overlay-canvas {
+    display: block;
+    border-radius: 8px;
+    background: #16213e;
+  }
+
+  /* ── Controls panel ── */
+  .controls-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    border: 1px solid var(--border);
+    margin: 1.2rem 0;
+  }
+  .controls-panel h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.9rem;
+  }
+  .control-row label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    width: 90px;
+    flex-shrink: 0;
+  }
+  .control-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    width: 36px;
+    text-align: right;
+  }
+
+  /* ── Live code preview ── */
+  .live-preview {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: var(--radius);
+    padding: 1rem 1.4rem;
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-top: 0.6rem;
+  }
+  .live-preview .kw  { color: #cba6f7; }
+  .live-preview .prop { color: #89dceb; }
+  .live-preview .val  { color: #f38ba8; }
+  .live-preview .cmt  { color: #6c7086; }
+
+  /* ── Scale calculator ── */
+  .scale-calc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    margin: 1.2rem 0;
+  }
+  .scale-calc h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+  .calc-inputs {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .calc-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .calc-field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .calc-field input {
+    width: 120px;
+    padding: 0.45rem 0.6rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .calc-field input:focus { outline: none; border-color: var(--accent); }
+  .scale-result {
+    font-family: "Fira Code", "Cascadia Code", monospace;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .scale-result .highlight { color: var(--accent); font-weight: 700; }
+  .scale-bar-track {
+    height: 18px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+  .scale-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.25s ease;
+    min-width: 4px;
+  }
+
+  /* ── Code peek ── */
+  .code-peek-section {
+    margin: 0 0 2rem;
+  }
+  .peek-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    width: 100%;
+    transition: border-color 0.15s, color 0.15s;
+    margin-bottom: 0.75rem;
+    font-family: inherit;
+  }
+  .peek-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .peek-toggle .arrow { transition: transform 0.2s; margin-left: auto; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; }
+  #code-peek-box.open { display: block; }
+
+  /* ── Footer ── */
+  .lesson-footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+  .lesson-footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Ready button ── */
+  .ready-btn {
+    display: block;
+    width: 100%;
+    margin-top: 2.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+  .ready-btn:hover { background: #b71c1c; }
+  .ready-btn:active { transform: scale(0.98); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="grade-tag">Grades 6–8 · Computer Science · 50–60 min</div>
+  <h1>The Hub</h1>
+  <p>If you have four programs, how do you put them all on one screen?</p>
+</header>
+
+<nav class="tab-bar" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept', this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-build" onclick="switchTab('build', this)" role="tab">Part 2 — Build It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="big-question">If you have four programs, how do you put them all on one screen?</p>
+    <p>Imagine four pet games — Star the axolotl, Ivy the owl, Astro the cat, and Gerald the rotisserie chicken — each living in its own separate HTML file. They work great on their own. Now someone asks: can we show all four at once, in a grid, like a TV split-screen?</p>
+    <p>That's exactly what a <strong>dashboard</strong> does.</p>
+
+    <h2>What is a dashboard?</h2>
+    <p>A dashboard is a page whose job is to <em>show other pages</em>, not to be a page itself. You see dashboards everywhere: a flight display at the airport shows multiple gate statuses; a stock ticker shows many symbols at once; a classroom hub might show the weather, the schedule, and a live camera feed.</p>
+    <p>Dashboards exist for one reason: it's much easier to build four small focused programs and then <em>compose</em> them into one view than to build one giant program that does everything.</p>
+
+    <h2>The iframe element</h2>
+    <p>HTML has a built-in way to embed one page inside another: the <strong>iframe</strong> (inline frame). You give it a <code>src</code> attribute pointing to any URL, and the browser loads that page inside a rectangle on your page.</p>
+
+    <div class="code-block">
+&lt;<span class="kw">iframe</span>
+  <span class="prop">src</span>=<span class="str">"star/index.html"</span>
+  <span class="prop">width</span>=<span class="str">"700"</span>
+  <span class="prop">height</span>=<span class="str">"500"</span>
+  <span class="prop">title</span>=<span class="str">"Star the Axolotl"</span>
+&gt;&lt;/<span class="kw">iframe</span>&gt;
+    </div>
+
+    <p>The critical thing to understand: <strong>the inner page has no idea it's inside an iframe.</strong> It runs completely independently. Its JavaScript, its animations, its timers — all isolated. This is intentional.</p>
+
+    <div class="callout">
+      <strong>Security feature:</strong> The inner pages don't know they're in a grid. iframes are intentionally isolated — that's a browser security feature, and it's exactly why the hub works without modifying the pets. Each pet just runs normally. The hub arranges them.
+    </div>
+
+    <h2>CSS Grid: arranging the cells</h2>
+    <p>To place four iframes in a 2×2 grid, we use <strong>CSS Grid</strong>. Grid lets you divide a container into rows and columns, then place children into those slots automatically.</p>
+
+    <div class="code-block">
+<span class="cmt">/* The outer page layout */</span>
+<span class="kw">body</span> {
+  <span class="prop">margin</span>: <span class="num">0</span>;
+  <span class="prop">background</span>: <span class="val">#111</span>;
+}
+
+<span class="kw">.grid</span> {
+  <span class="prop">display</span>: <span class="val">grid</span>;
+  <span class="prop">grid-template-columns</span>: <span class="num">1</span><span class="val">fr</span> <span class="num">1</span><span class="val">fr</span>;  <span class="cmt">/* 2 equal columns */</span>
+  <span class="prop">grid-template-rows</span>: <span class="num">1</span><span class="val">fr</span> <span class="num">1</span><span class="val">fr</span>;    <span class="cmt">/* 2 equal rows */</span>
+  <span class="prop">gap</span>: <span class="num">8</span><span class="val">px</span>;
+  <span class="prop">width</span>: <span class="val">100vw</span>;
+  <span class="prop">height</span>: <span class="val">100vh</span>;
+}
+
+<span class="kw">.cell</span> {
+  <span class="prop">position</span>: <span class="val">relative</span>;
+  <span class="prop">overflow</span>: <span class="val">hidden</span>;
+  <span class="prop">cursor</span>: <span class="val">pointer</span>;
+}
+
+<span class="kw">.cell iframe</span> {
+  <span class="prop">border</span>: <span class="val">none</span>;
+  <span class="prop">width</span>: <span class="num">700</span><span class="val">px</span>;   <span class="cmt">/* the pet's native width */</span>
+  <span class="prop">height</span>: <span class="num">500</span><span class="val">px</span>;  <span class="cmt">/* the pet's native height */</span>
+  <span class="prop">pointer-events</span>: <span class="val">none</span>;  <span class="cmt">/* let clicks pass to the cell */</span>
+  <span class="prop">transform-origin</span>: <span class="val">top left</span>;
+}
+    </div>
+
+    <p>The <code>1fr</code> unit means "one fraction of the available space." Two columns of <code>1fr 1fr</code> each get exactly half the width. Add more fractions and they divide proportionally.</p>
+
+    <h2>The scaling trick</h2>
+    <p>Here's the problem: each pet page is designed to run at 700px wide. But the grid cells might only be 400px wide — less than half the screen. If you load the iframe at 700px, it overflows its cell.</p>
+    <p>The fix: keep the iframe at its native size, and use a CSS <code>transform: scale()</code> to shrink it visually. The math is simple:</p>
+
+    <div class="code-block">
+<span class="kw">function</span> <span class="prop">scaleFrames</span>() {
+  <span class="kw">const</span> cells = document.querySelectorAll(<span class="str">'.cell'</span>);
+  cells.forEach(<span class="kw">cell</span> =&gt; {
+    <span class="kw">const</span> cellW  = cell.clientWidth;   <span class="cmt">// actual rendered width</span>
+    <span class="kw">const</span> cellH  = cell.clientHeight;  <span class="cmt">// actual rendered height</span>
+    <span class="kw">const</span> sx = cellW / <span class="num">700</span>;  <span class="cmt">// how much to shrink horizontally</span>
+    <span class="kw">const</span> sy = cellH / <span class="num">500</span>;  <span class="cmt">// how much to shrink vertically</span>
+    <span class="kw">const</span> frame = cell.querySelector(<span class="str">'iframe'</span>);
+    frame.style.transform = <span class="str">`scale(${sx}, ${sy})`</span>;
+  });
+}
+
+window.addEventListener(<span class="str">'resize'</span>, scaleFrames);
+scaleFrames();  <span class="cmt">// run once on load too</span>
+    </div>
+
+    <p>If the cell is 350px wide and the iframe is 700px wide, then <code>sx = 350 / 700 = 0.5</code>. The iframe gets scaled to exactly fit.</p>
+
+    <h2>Why pointer-events: none?</h2>
+    <p>By default, an iframe captures <em>all</em> mouse events — clicks, hovers, everything. That's great when you want to interact with the pet. But in the hub, you want clicking a cell to <em>expand</em> it, not interact with the pet inside.</p>
+    <p>Setting <code>pointer-events: none</code> on the iframe makes it invisible to mouse events. Clicks fall through to the parent <code>.cell</code> div, which runs your expand function.</p>
+
+    <h2>The close button placement problem</h2>
+    <p>When a cell expands into an overlay, you need a close button. The obvious place to put it: right on top of the overlay. But there's a trap.</p>
+    <p>If the close button is positioned <em>over</em> the iframe — even if it looks like it's "on top" visually — the iframe will intercept the click. iframes own every pixel of their rectangle, even through CSS layers.</p>
+
+    <div class="callout">
+      <strong>The rule:</strong> The close button must live outside the iframe's area in the parent document, or the iframe will intercept the click and it'll never fire. Use <code>position: fixed</code> on the button and place it in a corner of the <em>viewport</em>, not inside the overlay box. Fixed-position elements live in the viewport layer, above all iframe areas.
+    </div>
+
+    <h2>Expand and collapse</h2>
+    <p>When a cell is clicked, the hub shows an overlay with the pet at full size. Here's the pattern:</p>
+
+    <div class="code-block">
+<span class="kw">let</span> activeCell = <span class="kw">null</span>;
+
+<span class="kw">function</span> <span class="prop">expandCell</span>(cell) {
+  activeCell = cell;
+  <span class="kw">const</span> src = cell.dataset.src;
+  <span class="kw">const</span> overlay = document.getElementById(<span class="str">'overlay'</span>);
+  <span class="kw">const</span> frame   = document.getElementById(<span class="str">'overlay-frame'</span>);
+  frame.src = src;         <span class="cmt">// load the pet in the big iframe</span>
+  overlay.classList.add(<span class="str">'open'</span>);
+  document.getElementById(<span class="str">'close-btn'</span>).classList.add(<span class="str">'open'</span>);
+}
+
+<span class="kw">function</span> <span class="prop">collapseOverlay</span>() {
+  document.getElementById(<span class="str">'overlay'</span>).classList.remove(<span class="str">'open'</span>);
+  document.getElementById(<span class="str">'close-btn'</span>).classList.remove(<span class="str">'open'</span>);
+  document.getElementById(<span class="str">'overlay-frame'</span>).src = <span class="str">''</span>;  <span class="cmt">// free memory</span>
+  activeCell = <span class="kw">null</span>;
+}
+    </div>
+
+    <p>Note that the close button element is placed directly on the <code>&lt;body&gt;</code> — not inside the overlay div. <code>position: fixed; top: 16px; right: 20px</code> puts it in the viewport's top-right corner, safely outside every iframe's rectangle.</p>
+
+    <button class="ready-btn" onclick="unlockBuild()">Show me the demo →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-build" class="tab-section">
+
+  <!-- Close button — lives outside all iframe areas, position:fixed -->
+  <div id="overlay-backdrop">
+    <div id="overlay-box">
+      <div id="overlay-title">Loading...</div>
+      <canvas id="overlay-canvas" width="400" height="300"></canvas>
+    </div>
+  </div>
+  <button id="overlay-close" onclick="collapseOverlay()" title="Close">✕</button>
+
+  <div class="build-content">
+
+    <h2>Mini Hub Demo</h2>
+    <p>Click any pet cell to expand it. Click the ✕ in the top-right corner to close. (These are simulated pets drawn on canvas — the real hub uses actual iframes to the pet pages.)</p>
+
+    <div class="hub-container">
+      <div id="pet-grid">
+        <div class="pet-cell cell-star"   onclick="expandCell('star')"   title="Expand Star">
+          <canvas id="c-star"   width="280" height="210"></canvas>
+          <span class="cell-label">Star</span>
+        </div>
+        <div class="pet-cell cell-ivy"    onclick="expandCell('ivy')"    title="Expand Ivy">
+          <canvas id="c-ivy"    width="280" height="210"></canvas>
+          <span class="cell-label">Ivy</span>
+        </div>
+        <div class="pet-cell cell-astro"  onclick="expandCell('astro')"  title="Expand Astro">
+          <canvas id="c-astro"  width="280" height="210"></canvas>
+          <span class="cell-label">Astro</span>
+        </div>
+        <div class="pet-cell cell-gerald" onclick="expandCell('gerald')" title="Expand Gerald">
+          <canvas id="c-gerald" width="280" height="210"></canvas>
+          <span class="cell-label">Gerald</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Build Your Own Grid</h2>
+    <p>Adjust the sliders to change the grid layout. The code preview updates live.</p>
+
+    <div class="controls-panel">
+      <h3>Grid Controls</h3>
+      <div class="control-row">
+        <label for="ctrl-cols">Columns</label>
+        <input type="range" id="ctrl-cols" min="1" max="3" value="2" oninput="updateGrid()">
+        <span class="slider-val" id="val-cols">2</span>
+      </div>
+      <div class="control-row">
+        <label for="ctrl-gap">Gap</label>
+        <input type="range" id="ctrl-gap" min="0" max="20" value="8" oninput="updateGrid()">
+        <span class="slider-val" id="val-gap">8px</span>
+      </div>
+
+      <div class="live-preview" id="grid-code-preview"></div>
+    </div>
+
+    <h2>How Scaling Works</h2>
+    <p>The real hub loads each pet at its native 700px width, then scales it down to fit the cell. Try changing the numbers below to see how the math works.</p>
+
+    <div class="scale-calc">
+      <h3>Live Scale Calculator</h3>
+      <div class="calc-inputs">
+        <div class="calc-field">
+          <label for="calc-cell">Cell width (px)</label>
+          <input type="number" id="calc-cell" value="350" min="1" max="2000" oninput="updateCalc()">
+        </div>
+        <div class="calc-field">
+          <label for="calc-canvas">Canvas width (px)</label>
+          <input type="number" id="calc-canvas" value="700" min="1" max="4000" oninput="updateCalc()">
+        </div>
+      </div>
+      <div class="scale-result" id="scale-result"></div>
+      <div class="scale-bar-track">
+        <div class="scale-bar-fill" id="scale-bar"></div>
+      </div>
+    </div>
+
+    <h2>Peek at the code</h2>
+    <div class="code-peek-section">
+      <button class="peek-toggle" id="peek-btn" onclick="togglePeek()">
+        <span>Show the scaleFrames() and expand/collapse functions</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div id="code-peek-box">
+        <div class="code-block">
+<span class="cmt">// ── Scale iframes to fit their grid cells ────────────────</span>
+<span class="kw">function</span> <span class="prop">scaleFrames</span>() {
+  <span class="kw">const</span> cells = document.querySelectorAll(<span class="str">'.cell'</span>);
+  cells.forEach(<span class="kw">cell</span> =&gt; {
+    <span class="kw">const</span> sx = cell.clientWidth  / <span class="num">700</span>;  <span class="cmt">// pet's native width</span>
+    <span class="kw">const</span> sy = cell.clientHeight / <span class="num">500</span>;  <span class="cmt">// pet's native height</span>
+    <span class="kw">const</span> frame = cell.querySelector(<span class="str">'iframe'</span>);
+    frame.style.transform = <span class="str">`scale(${sx}, ${sy})`</span>;
+  });
+}
+window.addEventListener(<span class="str">'resize'</span>, scaleFrames);
+scaleFrames();
+
+<span class="cmt">// ── Expand a cell into full-screen overlay ────────────────</span>
+<span class="kw">let</span> activeCell = <span class="kw">null</span>;
+
+<span class="kw">function</span> <span class="prop">expandCell</span>(cell) {
+  activeCell = cell;
+  <span class="kw">const</span> src   = cell.dataset.src;
+  <span class="kw">const</span> frame = document.getElementById(<span class="str">'overlay-frame'</span>);
+  frame.src   = src;
+  document.getElementById(<span class="str">'overlay'</span>).classList.add(<span class="str">'open'</span>);
+
+  <span class="cmt">// close button: position:fixed top-right — OUTSIDE the iframe</span>
+  document.getElementById(<span class="str">'close-btn'</span>).classList.add(<span class="str">'open'</span>);
+}
+
+<span class="kw">function</span> <span class="prop">collapseOverlay</span>() {
+  document.getElementById(<span class="str">'overlay'</span>).classList.remove(<span class="str">'open'</span>);
+  document.getElementById(<span class="str">'close-btn'</span>).classList.remove(<span class="str">'open'</span>);
+  document.getElementById(<span class="str">'overlay-frame'</span>).src = <span class="str">''</span>;
+  activeCell = <span class="kw">null</span>;
+}
+
+<span class="cmt">// Clicking the backdrop also closes</span>
+document.getElementById(<span class="str">'overlay'</span>)
+  .addEventListener(<span class="str">'click'</span>, collapseOverlay);
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="lesson-footer">
+  The Hub · Grades 6–8 · Computer Science ·
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════
+// Mini creature renderers — each returns a draw(ctx, W, H, t) function
+// ═══════════════════════════════════════════════════════════════════
+
+function makeStar() {
+  // Blue axolotl blob — swims left-right
+  return function drawStar(ctx, W, H, t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // background gradient — underwater feel
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#0d1b2a');
+    bg.addColorStop(1, '#1a3a5c');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // swim: horizontal bob
+    const swimX = Math.sin(t * 0.9) * (W * 0.15);
+    const swimY = Math.sin(t * 1.6) * (H * 0.06);
+    const cx = W / 2 + swimX;
+    const cy = H / 2 + swimY;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // tail fins (gill frills)
+    for (let i = 0; i < 4; i++) {
+      const angle = -Math.PI * 0.35 + i * 0.22;
+      const frillX = -28 + i * 5;
+      const frillLen = 18 + Math.sin(t * 2 + i) * 4;
+      ctx.save();
+      ctx.translate(frillX, -20);
+      ctx.rotate(angle + Math.sin(t * 2 + i * 0.7) * 0.18);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, -frillLen);
+      ctx.strokeStyle = '#5ba3d9';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // body
+    const wobble = Math.sin(t * 1.3) * 1.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 34 + wobble, 26 - wobble * 0.4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#5ba3d9';
+    ctx.fill();
+
+    // belly
+    ctx.beginPath();
+    ctx.ellipse(4, 6, 18, 14, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#8ecae6';
+    ctx.fill();
+
+    // eyes
+    [[-12, -6], [12, -6]].forEach(([ex, ey]) => {
+      ctx.beginPath();
+      ctx.arc(ex, ey, 7, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 1.5, ey + 1, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#0d1b2a';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 2.5, ey, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    });
+
+    // smile
+    ctx.beginPath();
+    ctx.arc(0, 10, 10, 0.15, Math.PI - 0.15);
+    ctx.strokeStyle = '#0d3b5e';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // tail
+    ctx.beginPath();
+    ctx.moveTo(-34, 0);
+    ctx.quadraticCurveTo(
+      -52, Math.sin(t * 1.8) * 18,
+      -44, Math.sin(t * 1.8) * 28
+    );
+    ctx.strokeStyle = '#5ba3d9';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ctx.restore();
+
+    // bubbles
+    const bubbles = [
+      { x: W * 0.72, y: H * 0.2 + Math.sin(t + 1.1) * 6 },
+      { x: W * 0.78, y: H * 0.35 + Math.sin(t + 2.3) * 5 },
+    ];
+    bubbles.forEach(b => {
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(140,202,230,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  };
+}
+
+function makeIvy() {
+  // Purple owl blob — bobs up-down, wing flaps
+  return function drawIvy(ctx, W, H, t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // night sky
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#120a2e');
+    bg.addColorStop(1, '#1e1040');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // stars
+    [[W * 0.15, H * 0.12], [W * 0.7, H * 0.08], [W * 0.85, H * 0.2],
+     [W * 0.3, H * 0.06], [W * 0.55, H * 0.15]].forEach(([sx, sy]) => {
+      const pulse = 0.5 + 0.5 * Math.sin(t * 1.5 + sx);
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,200,${pulse})`;
+      ctx.fill();
+    });
+
+    const bobY = Math.sin(t * 1.1) * (H * 0.06);
+    const cx = W / 2;
+    const cy = H / 2 + 5 + bobY;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // wings
+    const wingAngle = Math.sin(t * 1.8) * 0.3;
+    [-1, 1].forEach(side => {
+      ctx.save();
+      ctx.translate(side * 28, 4);
+      ctx.rotate(side * (0.4 + wingAngle));
+      ctx.beginPath();
+      ctx.ellipse(side * 10, 0, 22, 12, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#5a3e8a';
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // body
+    ctx.beginPath();
+    ctx.ellipse(0, 4, 28, 36, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#7c5cbf';
+    ctx.fill();
+
+    // tummy
+    ctx.beginPath();
+    ctx.ellipse(0, 14, 16, 20, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#b39ddb';
+    ctx.fill();
+
+    // head
+    ctx.beginPath();
+    ctx.arc(0, -26, 24, 0, Math.PI * 2);
+    ctx.fillStyle = '#7c5cbf';
+    ctx.fill();
+
+    // ear tufts
+    [[-16, -46], [16, -46]].forEach(([ex, ey]) => {
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate(ex < 0 ? -0.3 : 0.3);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-5, -12);
+      ctx.lineTo(5, -12);
+      ctx.closePath();
+      ctx.fillStyle = '#5a3e8a';
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // eyes — big round owl eyes
+    [[-10, -28], [10, -28]].forEach(([ex, ey]) => {
+      ctx.beginPath();
+      ctx.arc(ex, ey, 9, 0, Math.PI * 2);
+      ctx.fillStyle = '#f9e2af';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 1, ey + 1, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a0a2e';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 2.5, ey - 1, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    });
+
+    // beak
+    ctx.beginPath();
+    ctx.moveTo(0, -22);
+    ctx.lineTo(-5, -16);
+    ctx.lineTo(5, -16);
+    ctx.closePath();
+    ctx.fillStyle = '#f9a825';
+    ctx.fill();
+
+    // feet
+    [[-10, 38], [10, 38]].forEach(([fx, fy]) => {
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.lineTo(fx - 6, fy + 10);
+      ctx.lineTo(fx, fy + 9);
+      ctx.lineTo(fx + 6, fy + 10);
+      ctx.strokeStyle = '#5a3e8a';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    });
+
+    ctx.restore();
+
+    // moon
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(W * 0.82, H * 0.15, 14, 0, Math.PI * 2);
+    ctx.fillStyle = '#fffde7';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(W * 0.86, H * 0.13, 11, 0, Math.PI * 2);
+    ctx.fillStyle = '#120a2e';
+    ctx.fill();
+    ctx.restore();
+  };
+}
+
+function makeAstro() {
+  // Black cat blob — sits, tail wags
+  return function drawAstro(ctx, W, H, t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // rooftop at dusk
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#1a0a10');
+    bg.addColorStop(1, '#2e1020');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // rooftop ledge
+    ctx.fillStyle = '#3a1820';
+    ctx.fillRect(0, H * 0.72, W, H * 0.28);
+    ctx.fillStyle = '#4a2030';
+    ctx.fillRect(0, H * 0.72, W, 8);
+
+    // city lights in distance
+    [[W*0.12, H*0.68], [W*0.22, H*0.62], [W*0.35, H*0.65],
+     [W*0.78, H*0.64], [W*0.88, H*0.60]].forEach(([bx, by]) => {
+      ctx.fillStyle = `rgba(255,200,100,${0.3 + Math.random() * 0.05})`;
+      ctx.fillRect(bx, by, 6, 14);
+    });
+
+    const cx = W / 2 - 4;
+    const cy = H * 0.6;
+
+    // wagging tail — sweeps left/right
+    const tailWag = Math.sin(t * 2.2) * 0.7;
+    ctx.save();
+    ctx.translate(cx - 16, cy + 14);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(
+      -20 + Math.sin(t * 2.2) * 18, 10,
+      -30 + Math.sin(t * 2.2 + 1) * 22, -10,
+      -36 + Math.cos(t * 2.2) * 20, -22
+    );
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // body — sitting cat shape
+    ctx.beginPath();
+    ctx.ellipse(0, 6, 26, 30, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fill();
+
+    // front paws
+    [[-12, 30], [12, 30]].forEach(([px, py]) => {
+      ctx.beginPath();
+      ctx.ellipse(px, py, 9, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fill();
+    });
+
+    // head
+    ctx.beginPath();
+    ctx.arc(0, -26, 22, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fill();
+
+    // ears
+    [[-14, -44], [14, -44]].forEach(([ex, ey]) => {
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate(ex < 0 ? -0.25 : 0.25);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-8, -16);
+      ctx.lineTo(8, -16);
+      ctx.closePath();
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fill();
+      // inner ear
+      ctx.beginPath();
+      ctx.moveTo(0, -2);
+      ctx.lineTo(-4, -11);
+      ctx.lineTo(4, -11);
+      ctx.closePath();
+      ctx.fillStyle = '#5a2030';
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // eyes — green cat eyes, slit pupils
+    [[-9, -28], [9, -28]].forEach(([ex, ey]) => {
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 8, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#4caf50';
+      ctx.fill();
+      // slit pupil
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 2, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 3, ey - 2, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fill();
+    });
+
+    // nose
+    ctx.beginPath();
+    ctx.moveTo(0, -20);
+    ctx.lineTo(-3, -17);
+    ctx.lineTo(3, -17);
+    ctx.closePath();
+    ctx.fillStyle = '#e91e63';
+    ctx.fill();
+
+    // whiskers
+    [[-1, -18], [1, -18]].forEach(([wx, wy]) => {
+      [-1, 0, 1].forEach(row => {
+        const side = wx < 0 ? -1 : 1;
+        ctx.beginPath();
+        ctx.moveTo(wx, wy + row * 4);
+        ctx.lineTo(wx + side * 22, wy + row * 5);
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+    });
+
+    ctx.restore();
+
+    // stars on rooftop
+    [[W*0.15, H*0.15], [W*0.6, H*0.08], [W*0.82, H*0.18]].forEach(([sx, sy]) => {
+      const p = 0.5 + 0.5 * Math.sin(t + sx);
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,200,${p * 0.8})`;
+      ctx.fill();
+    });
+  };
+}
+
+function makeGerald() {
+  // Golden blob — the headless rotisserie chicken — rotates slowly on a spit
+  return function drawGerald(ctx, W, H, t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // warm kitchen background
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#1a1000');
+    bg.addColorStop(1, '#2e1e00');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // warm glow from below
+    const glow = ctx.createRadialGradient(W/2, H, 10, W/2, H, H * 0.7);
+    glow.addColorStop(0, 'rgba(255,120,0,0.25)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    const cx = W / 2;
+    const cy = H / 2 + 5;
+
+    // spit rod (horizontal bar)
+    ctx.beginPath();
+    ctx.moveTo(W * 0.05, cy);
+    ctx.lineTo(W * 0.95, cy);
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // spit supports
+    [[W * 0.1, cy], [W * 0.9, cy]].forEach(([sx, sy]) => {
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx, sy + 28);
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    });
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(t * 0.8);  // slow steady rotation on the spit
+
+    // body — roasted golden blob
+    const golden = ctx.createRadialGradient(-8, -6, 4, 0, 0, 38);
+    golden.addColorStop(0, '#f9d060');
+    golden.addColorStop(0.5, '#e6900a');
+    golden.addColorStop(1, '#a05000');
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 38, 30, 0, 0, Math.PI * 2);
+    ctx.fillStyle = golden;
+    ctx.fill();
+
+    // drumstick legs (two lumps)
+    [[-22, 22], [22, 22]].forEach(([lx, ly]) => {
+      const legG = ctx.createRadialGradient(lx - 2, ly - 2, 2, lx, ly, 14);
+      legG.addColorStop(0, '#f9c840');
+      legG.addColorStop(1, '#a05000');
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, 14, 10, 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = legG;
+      ctx.fill();
+    });
+
+    // wing bumps
+    [[-36, -4], [36, -4]].forEach(([wx, wy]) => {
+      ctx.beginPath();
+      ctx.ellipse(wx, wy, 12, 8, 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#c07000';
+      ctx.fill();
+    });
+
+    // napkin (oracle notes) — flutters slightly
+    ctx.save();
+    ctx.rotate(Math.sin(t * 0.7) * 0.12);
+    ctx.beginPath();
+    ctx.moveTo(8, -30);
+    ctx.lineTo(30, -34);
+    ctx.lineTo(32, -14);
+    ctx.lineTo(10, -10);
+    ctx.closePath();
+    ctx.fillStyle = '#fff9e6';
+    ctx.fill();
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    // tiny scribble lines on napkin
+    [[14, -28], [14, -24], [14, -20], [20, -28], [20, -24]].forEach(([nx, ny]) => {
+      ctx.beginPath();
+      ctx.moveTo(nx, ny);
+      ctx.lineTo(nx + 8, ny - 1);
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    });
+    // ΔΣ=42 label
+    ctx.font = 'bold 5px sans-serif';
+    ctx.fillStyle = '#c62828';
+    ctx.fillText('ΔΣ=42', 13, -16);
+    ctx.restore();
+
+    // no head — just a small neck stump
+    ctx.beginPath();
+    ctx.ellipse(0, -32, 8, 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#c07000';
+    ctx.fill();
+
+    // spit hole through center
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#888';
+    ctx.fill();
+
+    ctx.restore();
+
+    // heat shimmer dots at bottom
+    for (let i = 0; i < 3; i++) {
+      const hx = W * (0.3 + i * 0.2);
+      const hy = H * 0.88 + Math.sin(t * 3 + i * 1.4) * 5;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,100,0,${0.3 + Math.sin(t * 2 + i) * 0.15})`;
+      ctx.fill();
+    }
+
+    // "ΔΣ=42" text label in corner
+    ctx.font = 'bold 11px monospace';
+    ctx.fillStyle = 'rgba(249,168,37,0.6)';
+    ctx.textAlign = 'right';
+    ctx.fillText('ΔΣ=42', W - 10, H - 10);
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Animation engine — runs all four canvases simultaneously
+// ═══════════════════════════════════════════════════════════════════
+
+const pets = {
+  star:   { draw: makeStar(),   canvas: null, ctx: null },
+  ivy:    { draw: makeIvy(),    canvas: null, ctx: null },
+  astro:  { draw: makeAstro(), canvas: null, ctx: null },
+  gerald: { draw: makeGerald(), canvas: null, ctx: null },
+};
+
+let globalT = 0;
+let overlayActive = null;
+let overlayCtx = null;
+const overlayCanvas = document.getElementById('overlay-canvas');
+overlayCtx = overlayCanvas.getContext('2d');
+
+function initCanvases() {
+  ['star', 'ivy', 'astro', 'gerald'].forEach(name => {
+    const c = document.getElementById('c-' + name);
+    pets[name].canvas = c;
+    pets[name].ctx = c.getContext('2d');
+  });
+}
+
+function animationLoop() {
+  globalT += 0.025;
+
+  ['star', 'ivy', 'astro', 'gerald'].forEach(name => {
+    const p = pets[name];
+    if (p.ctx) {
+      p.draw(p.ctx, p.canvas.width, p.canvas.height, globalT);
+    }
+  });
+
+  // also animate overlay if open
+  if (overlayActive) {
+    pets[overlayActive].draw(
+      overlayCtx,
+      overlayCanvas.width,
+      overlayCanvas.height,
+      globalT
+    );
+  }
+
+  requestAnimationFrame(animationLoop);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Expand / collapse overlay
+// ═══════════════════════════════════════════════════════════════════
+
+function expandCell(name) {
+  overlayActive = name;
+  document.getElementById('overlay-title').textContent = {
+    star:   'Star the Axolotl',
+    ivy:    'Ivy the Owl',
+    astro:  'Astro the Cat',
+    gerald: 'Gerald Prime',
+  }[name];
+  document.getElementById('overlay-backdrop').classList.add('open');
+  document.getElementById('overlay-close').classList.add('open');
+}
+
+function collapseOverlay() {
+  overlayActive = null;
+  document.getElementById('overlay-backdrop').classList.remove('open');
+  document.getElementById('overlay-close').classList.remove('open');
+}
+
+// clicking the backdrop (but not the box) closes overlay
+document.getElementById('overlay-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) collapseOverlay();
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Grid controls
+// ═══════════════════════════════════════════════════════════════════
+
+function updateGrid() {
+  const cols = parseInt(document.getElementById('ctrl-cols').value, 10);
+  const gap  = parseInt(document.getElementById('ctrl-gap').value, 10);
+
+  document.getElementById('val-cols').textContent = cols;
+  document.getElementById('val-gap').textContent = gap + 'px';
+
+  const grid = document.getElementById('pet-grid');
+  grid.style.gridTemplateColumns = Array(cols).fill('1fr').join(' ');
+  grid.style.gap = gap + 'px';
+
+  // live code preview
+  const colStr = Array(cols).fill('1fr').join(' ');
+  document.getElementById('grid-code-preview').innerHTML =
+    '<span class="kw">.grid</span> {\n' +
+    '  <span class="prop">display</span>: <span class="val">grid</span>;\n' +
+    '  <span class="prop">grid-template-columns</span>: <span class="val">' + colStr + '</span>; ' +
+    '<span class="cmt">/* ' + cols + ' equal column' + (cols === 1 ? '' : 's') + ' */</span>\n' +
+    '  <span class="prop">gap</span>: <span class="val">' + gap + 'px</span>;\n' +
+    '}';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Scale calculator
+// ═══════════════════════════════════════════════════════════════════
+
+function updateCalc() {
+  const cellW   = parseFloat(document.getElementById('calc-cell').value) || 1;
+  const canvasW = parseFloat(document.getElementById('calc-canvas').value) || 1;
+  const scale   = cellW / canvasW;
+  const pct     = Math.min(1, Math.max(0, scale)) * 100;
+
+  document.getElementById('scale-result').innerHTML =
+    'scale = <span class="highlight">' + cellW.toFixed(0) + '</span>' +
+    ' / <span class="highlight">' + canvasW.toFixed(0) + '</span>' +
+    ' = <span class="highlight">' + scale.toFixed(2) + '</span>' +
+    (scale > 1 ? ' &nbsp;<em style="color:var(--muted);font-size:0.85em">(zoomed in — wider than native)</em>' :
+     scale < 0.5 ? ' &nbsp;<em style="color:var(--muted);font-size:0.85em">(less than half size)</em>' : '');
+
+  document.getElementById('scale-bar').style.width = Math.min(100, pct) + '%';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Code peek toggle
+// ═══════════════════════════════════════════════════════════════════
+
+function togglePeek() {
+  const box = document.getElementById('code-peek-box');
+  const btn = document.getElementById('peek-btn');
+  const open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Tab switching
+// ═══════════════════════════════════════════════════════════════════
+
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockBuild() {
+  const btn = document.getElementById('tab-btn-build');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('build', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════════════════
+
+initCanvases();
+animationLoop();
+updateGrid();
+updateCalc();
+</script>
+</body>
+</html>
