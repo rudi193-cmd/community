@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creature Lab — CS Lessons</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Lexend", system-ui, sans-serif;
+    background: linear-gradient(135deg, #f6efe1 0%, #fffdf8 100%);
+    color: #2c2440;
+    line-height: 1.6;
+    padding: 2rem 1.5rem;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  .intro {
+    font-size: 1.15rem;
+    color: #6f6685;
+    margin-bottom: 2.5rem;
+    max-width: 60ch;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .card {
+    background: #fff;
+    border: 2px solid #e6dcc6;
+    border-radius: 18px;
+    padding: 1.5rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(44,36,64,0.12); }
+  .card a { text-decoration: none; color: inherit; }
+  .grade { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #ff7a4d; }
+  .card h2 { font-family: "Bricolage Grotesque", sans-serif; font-size: 1.25rem; color: #7c4dff; }
+  .card p { font-size: 0.95rem; color: #6f6685; }
+  .footer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #6f6685;
+    border-top: 1px solid #e6dcc6;
+    padding-top: 2rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Creature Lab</h1>
+  <p class="intro">Eight hands-on computer science lessons for grades 4–8. Build a virtual pet from scratch, wire up interactions, code a network, and learn the systems that make programs work.</p>
+
+  <div class="grid">
+    <div class="card">
+      <span class="grade">Grades 4–6</span>
+      <a href="Design Your Creature.html"><h2>Design Your Creature</h2></a>
+      <p>Before any code, draw and name your pet. What colors? What makes it happy? What's its superpower?</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 4–6</span>
+      <a href="Your First Pet.html"><h2>Your First Pet</h2></a>
+      <p>Tell the computer how to draw your creature. Canvas, shapes, animation loops — the full pipeline.</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 5–7</span>
+      <a href="Buttons and Interaction.html"><h2>Buttons &amp; Interaction</h2></a>
+      <p>Click a button, something runs, your pet reacts. Build the action system that brings your creature to life.</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 5–7</span>
+      <a href="Stats and Decay.html"><h2>Stats and Decay</h2></a>
+      <p>Your pet has needs. Food, energy, happiness — they drain over time. Now your pet needs you.</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 5–7</span>
+      <a href="Save Your Pet.html"><h2>Save Your Pet</h2></a>
+      <p>Close the browser and come back later — your pet remembers. Learn how localStorage makes data persist.</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 6–8</span>
+      <a href="Living Network.html"><h2>The Living Network</h2></a>
+      <p>Two pets running in two tabs. How do they send letters? localStorage as a shared mailbox — real distributed systems.</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 6–8</span>
+      <a href="The Hub.html"><h2>The Hub</h2></a>
+      <p>A dashboard that brings four pets together. CSS Grid, iframes, scaling — real interface design patterns.</p>
+    </div>
+
+    <div class="card">
+      <span class="grade">Grades 6–8</span>
+      <a href="Flash the Watch.html"><h2>Flash the Watch</h2></a>
+      <p>Take your pet to hardware. Upload C++ to a microcontroller watch. Your code, compiled and running on a device.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Creature Lab · Computer Science Curriculum<br>
+    <a href="https://github.com/Emerging-Rule/community" style="color: #7c4dff; text-decoration: none;">Emerging Rule Community</a>
+    · <a href="https://creativecommons.org/licenses/by/4.0/" style="color: #7c4dff; text-decoration: none;">CC BY 4.0</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your First Pet — CS 4–6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* ── paper + ink ── */
+    --paper:    #f6efe1;   /* warm cream page */
+    --paper-2:  #fffdf8;   /* card surface */
+    --ink:      #2c2440;   /* deep grape charcoal */
+    --ink-soft: #6f6685;
+    --line:     #e6dcc6;   /* warm hairline */
+
+    /* ── brand ── */
+    --grape:      #7c4dff;
+    --grape-deep: #5a32cc;
+    --grape-soft: #efe9ff;
+    --tang:       #ff7a4d;
+    --tang-deep:  #d9532a;
+    --tang-soft:  #ffe7da;
+
+    /* ── stat semantics ── */
+    --mint:  #16c79a;  --mint-deep:#0f9a76;   /* food   */
+    --sun:   #ffc23d;  --sun-deep: #d99300;   /* happy  */
+    --sky:   #3da5ff;  --sky-deep: #1f7ad6;   /* energy */
+    --bubble:#ff5d8f;
+
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow-soft: 0 1px 0 rgba(44,36,64,.04), 0 18px 36px -22px rgba(44,36,64,.45);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Lexend", system-ui, sans-serif;
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, rgba(124,77,255,.10) 1.3px, transparent 1.4px);
+    background-size: 24px 24px;
+    background-position: -2px -2px;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 3rem;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ══════════════════════════════ MASTHEAD ══════════════════════════════ */
+  .masthead {
+    position: relative;
+    max-width: 880px;
+    margin: 1.5rem auto 0;
+    background: var(--grape);
+    color: #fff;
+    border-radius: 26px;
+    padding: 2.1rem 2.2rem;
+    overflow: hidden;
+    box-shadow: 0 6px 0 var(--grape-deep), 0 30px 50px -28px rgba(90,50,204,.8);
+  }
+  .masthead::before {  /* dotted texture */
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.4px, transparent 1.5px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+  .mast-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  @media (max-width: 600px) {
+    .mast-grid { grid-template-columns: 1fr; }
+    .masthead { padding: 1.6rem 1.4rem; }
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--sun);
+    color: #4a3700;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .35rem .8rem;
+    border-radius: 100px;
+    transform: rotate(-1.5deg);
+    box-shadow: 0 3px 0 var(--sun-deep);
+  }
+  .mast-left h1 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.1rem, 6vw, 3.1rem);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    margin: .85rem 0 .55rem;
+  }
+  .mast-left h1 .amp { color: var(--sun); font-style: italic; }
+  .bigq {
+    font-size: clamp(1.05rem, 2.4vw, 1.22rem);
+    line-height: 1.45;
+    color: rgba(255,255,255,.9);
+    max-width: 30ch;
+  }
+  .bigq em { color: var(--sun); font-style: normal; font-weight: 600; }
+  .mast-trail {
+    margin-top: 1rem;
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .82rem; color: rgba(255,255,255,.72);
+    font-weight: 500;
+  }
+  .mast-trail .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--tang); }
+
+  /* pet tank */
+  .mast-pet { display: flex; flex-direction: column; align-items: center; gap: .55rem; }
+  .pet-tank {
+    position: relative;
+    width: 168px; height: 152px;
+    background: var(--paper-2);
+    border-radius: 22px;
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.5), 0 8px 0 rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  .pet-tank::after {  /* little floor shadow */
+    content:""; position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    width: 84px; height: 14px; border-radius: 50%;
+    background: rgba(44,36,64,.10);
+    filter: blur(1px);
+  }
+  #mascot { position: relative; z-index: 1; display: block; }
+  .pet-name {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700; font-size: .8rem;
+    background: #fff; color: var(--grape);
+    padding: .25rem .8rem; border-radius: 100px;
+    transform: rotate(2deg);
+    box-shadow: 0 3px 0 rgba(0,0,0,.15);
+  }
+
+  /* ══════════════════════════════ TABS ══════════════════════════════ */
+  .tabs {
+    max-width: 880px;
+    margin: 1.4rem auto 0;
+    padding: 0 .4rem;
+    display: flex;
+    gap: .6rem;
+  }
+  .tab-btn {
+    flex: 1;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 16px 16px 0 0;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    transition: transform .12s ease, color .15s, background .15s, border-color .15s;
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+  }
+  .tab-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--line); color: var(--ink-soft);
+    font-size: .82rem; flex-shrink: 0;
+    transition: background .15s, color .15s;
+  }
+  .tab-btn:hover:not(.locked):not(.active) { color: var(--ink); transform: translateY(-2px); }
+  .tab-btn.active {
+    color: var(--grape);
+    background: var(--paper-2);
+    border-color: var(--grape);
+    border-bottom-color: var(--paper-2);
+    box-shadow: 0 -4px 0 var(--grape-soft) inset;
+  }
+  .tab-btn.active .tab-num { background: var(--grape); color: #fff; }
+  .tab-btn.locked { opacity: .55; cursor: not-allowed; }
+  .tab-lock { font-size: .9rem; }
+
+  /* ══════════════════════════════ SHEET ══════════════════════════════ */
+  .sheet {
+    max-width: 880px;
+    margin: 0 auto;
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 0 0 24px 24px;
+    box-shadow: var(--shadow-soft);
+  }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ── lesson content ── */
+  .lesson-content { padding: 2.2rem clamp(1.25rem, 4vw, 2.8rem) 2.6rem; }
+
+  .lead {
+    font-size: 1.16rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 1.8rem;
+  }
+  .lead .hl { background: linear-gradient(transparent 62%, var(--sun) 62%); padding: 0 .1em; }
+
+  .sec-head {
+    display: flex; align-items: center; gap: .7rem;
+    margin: 2.4rem 0 .9rem;
+  }
+  .sec-head:first-child { margin-top: 0; }
+  .sec-num {
+    flex-shrink: 0;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: var(--grape); color: #fff;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .92rem;
+    transform: rotate(-4deg);
+    box-shadow: 0 3px 0 var(--grape-deep);
+  }
+  .sec-head h2 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.42rem;
+    letter-spacing: -.01em;
+    color: var(--ink);
+  }
+  .lesson-content p { margin-bottom: 1.05rem; }
+  .lesson-content p code, .lesson-content li code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: .86em;
+    background: var(--grape-soft);
+    color: var(--grape-deep);
+    padding: .1em .42em;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .lesson-content ul { margin: .4rem 0 1.1rem 0; list-style: none; }
+  .lesson-content li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin-bottom: .55rem;
+  }
+  .lesson-content li::before {
+    content: "›";
+    position: absolute; left: .35rem; top: -.05rem;
+    color: var(--tang); font-weight: 700; font-size: 1.1rem;
+  }
+
+  /* ── editor code window ── */
+  .editor {
+    margin: 1.1rem 0 1.4rem;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #2a2440;
+    box-shadow: 0 4px 0 rgba(44,36,64,.25), 0 22px 40px -26px rgba(44,36,64,.8);
+  }
+  .editor-bar {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .6rem .9rem;
+    background: #221d36;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .editor-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .editor-bar .dot.r { background: var(--tang); }
+  .editor-bar .dot.y { background: var(--sun); }
+  .editor-bar .dot.g { background: var(--mint); }
+  .editor-file {
+    margin-left: .5rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .76rem; font-weight: 500;
+    color: rgba(255,255,255,.5);
+    letter-spacing: .02em;
+  }
+  .editor-tag {
+    margin-left: auto;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: rgba(255,255,255,.32);
+  }
+  .editor-body {
+    padding: 1.05rem 1.25rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .85rem;
+    line-height: 1.75;
+    color: #e7e2ff;
+    overflow-x: auto;
+  }
+  .kw  { color: #c4b5ff; }
+  .str { color: #5fe3c0; }
+  .num { color: #ffb27a; }
+  .cmt { color: #7a7196; font-style: italic; }
+  .fn  { color: #7ec8ff; }
+
+  /* ── sticky note callout ── */
+  .note {
+    position: relative;
+    background: var(--sun);
+    color: #4a3700;
+    border-radius: 4px 12px 12px 12px;
+    padding: 1.15rem 1.3rem 1.2rem;
+    margin: 1.5rem 0;
+    box-shadow: 0 10px 24px -14px rgba(217,147,0,.8);
+    transform: rotate(-.5deg);
+  }
+  .note::before {  /* tape */
+    content: "";
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+    width: 78px; height: 20px;
+    background: rgba(255,255,255,.45);
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+  .note strong { font-family: "Bricolage Grotesque", sans-serif; }
+  .note.note--grape { background: var(--grape-soft); color: var(--grape-deep); box-shadow: 0 10px 24px -14px rgba(124,77,255,.6); }
+  .note.note--grape::before { background: rgba(124,77,255,.22); }
+
+  /* ── ask / think prompt ── */
+  .ask {
+    display: flex; gap: .8rem; align-items: flex-start;
+    background: var(--tang-soft);
+    border: 2px dashed var(--tang);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    margin: 1.4rem 0;
+  }
+  .ask .q {
+    flex-shrink: 0;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800;
+    color: var(--tang-deep);
+    font-size: 1.3rem; line-height: 1;
+    margin-top: .1rem;
+  }
+  .ask p { margin: 0 !important; color: #7a3d22; font-size: .98rem; }
+
+  /* ── ready button ── */
+  .ready-wrap { text-align: center; margin-top: 2.6rem; }
+  .ready-btn {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800; font-size: 1.12rem;
+    color: #fff; background: var(--tang);
+    border: none; border-radius: 16px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--tang-deep);
+    transition: transform .1s ease, box-shadow .1s ease;
+    display: inline-flex; align-items: center; gap: .6rem;
+  }
+  .ready-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--tang-deep); }
+  .ready-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--tang-deep); }
+  .ready-sub { margin-top: .8rem; font-size: .85rem; color: var(--ink-soft); }
+
+  /* ══════════════════════════════ SANDBOX ══════════════════════════════ */
+  .sandbox {
+    padding: 1.8rem clamp(1rem, 3vw, 2rem) 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+  @media (min-width: 720px) { .sandbox { grid-template-columns: 300px 1fr; align-items: start; } }
+
+  /* device */
+  .device {
+    background: var(--grape);
+    border-radius: 24px;
+    padding: 1.1rem;
+    box-shadow: 0 6px 0 var(--grape-deep), 0 26px 44px -28px rgba(90,50,204,.8);
+    position: relative;
+  }
+  .device-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: .1rem .3rem .7rem;
+    color: rgba(255,255,255,.85);
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .82rem; letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .device-top .led { display: inline-flex; gap: 5px; }
+  .device-top .led i { width: 8px; height: 8px; border-radius: 50%; background: var(--sun); display: inline-block; }
+  .device-top .led i:nth-child(2){ background: var(--mint); }
+  .device-top .led i:nth-child(3){ background: var(--tang); }
+  .screen {
+    background: #fdf3e7;
+    border-radius: 16px;
+    padding: .6rem;
+    box-shadow: inset 0 2px 8px rgba(44,36,64,.18);
+  }
+  #c { display: block; width: 100%; height: auto; border-radius: 11px; background: transparent; }
+  .mood-caption {
+    text-align: center;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .9rem; color: var(--grape-deep);
+    background: #fff;
+    margin: .55rem .2rem 0;
+    padding: .35rem; border-radius: 10px;
+  }
+
+  .stat-bars { margin: .9rem .2rem .2rem; display: flex; flex-direction: column; gap: .55rem; }
+  .stat-row { display: flex; align-items: center; gap: .55rem; }
+  .stat-label {
+    width: 54px; flex-shrink: 0;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .76rem; color: #fff; letter-spacing: .02em;
+  }
+  .stat-track {
+    flex: 1; height: 13px;
+    background: rgba(0,0,0,.22);
+    border-radius: 100px; overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.25);
+  }
+  .stat-fill { height: 100%; border-radius: 100px; transition: width .4s cubic-bezier(.34,1.3,.5,1); position: relative; }
+  .stat-fill::after { content:""; position:absolute; top:2px; left:5px; right:5px; height:3px; border-radius:100px; background:rgba(255,255,255,.4); }
+  .stat-fill.food   { background: var(--mint); }
+  .stat-fill.happy  { background: var(--sun); }
+  .stat-fill.energy { background: var(--sky); }
+  .stat-pct { width: 34px; text-align: right; font-size: .76rem; font-weight: 600; color: rgba(255,255,255,.8); flex-shrink: 0; }
+
+  .action-btns { display: flex; gap: .5rem; margin: .9rem .2rem .1rem; }
+  .action-btn {
+    flex: 1;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .92rem;
+    border: none; border-radius: 13px;
+    padding: .7rem .4rem;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .action-btn:active { transform: translateY(4px); }
+  .btn-feed { background: var(--mint); color: #053a2d; box-shadow: 0 4px 0 var(--mint-deep); }
+  .btn-feed:active { box-shadow: 0 0 0 var(--mint-deep); }
+  .btn-play { background: var(--sun); color: #4a3700; box-shadow: 0 4px 0 var(--sun-deep); }
+  .btn-play:active { box-shadow: 0 0 0 var(--sun-deep); }
+  .btn-rest { background: var(--sky); color: #06294d; box-shadow: 0 4px 0 var(--sky-deep); }
+  .btn-rest:active { box-shadow: 0 0 0 var(--sky-deep); }
+
+  /* builder bench */
+  .builder {
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 1.3rem;
+    display: flex; flex-direction: column; gap: 1.05rem;
+  }
+  .builder-head {
+    display: flex; align-items: center; gap: .6rem;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800;
+    font-size: 1.15rem; color: var(--ink);
+    padding-bottom: .75rem; border-bottom: 2px solid var(--line);
+  }
+  .builder-head .chip {
+    background: var(--tang); color: #fff; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+    padding: .2rem .55rem; border-radius: 100px; box-shadow: 0 2px 0 var(--tang-deep);
+  }
+  .ctl { display: flex; flex-direction: column; gap: .4rem; }
+  .ctl > label {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ctl select {
+    width: 100%; padding: .6rem .7rem;
+    border: 2px solid var(--line); border-radius: 11px;
+    font-family: "Lexend", sans-serif; font-size: .95rem; color: var(--ink);
+    background: var(--paper); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .ctl select:focus { outline: none; border-color: var(--grape); }
+  .slider-val {
+    font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--grape);
+    background: var(--grape-soft); padding: .05rem .5rem; border-radius: 7px; font-size: .85rem;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--grape); cursor: pointer; height: 22px; }
+
+  .dir-row { display: flex; gap: .5rem; }
+  .dir-btn {
+    flex: 1; padding: .55rem;
+    border: 2px solid var(--line); border-radius: 11px;
+    background: var(--paper); cursor: pointer;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .9rem; color: var(--ink-soft);
+    transition: border-color .12s, background .12s, color .12s, transform .1s;
+  }
+  .dir-btn:hover { transform: translateY(-1px); }
+  .dir-btn.selected { border-color: var(--grape); background: var(--grape-soft); color: var(--grape-deep); }
+
+  .emoji-map { display: flex; flex-wrap: wrap; gap: 5px; }
+  .emoji-chip {
+    font-size: 1.25rem; line-height: 1; padding: 5px 6px;
+    border-radius: 9px; cursor: pointer;
+    background: var(--paper); border: 2px solid var(--line);
+    transition: border-color .1s, background .1s, transform .1s;
+    user-select: none;
+  }
+  .emoji-chip:hover { border-color: var(--grape); transform: translateY(-2px) scale(1.05); }
+  .emoji-chip.selected { border-color: var(--grape); background: var(--grape-soft); }
+  .emoji-text {
+    width: 100%; margin-top: 6px; padding: .45rem .6rem;
+    border: 2px solid var(--line); border-radius: 10px;
+    font-family: "Lexend", sans-serif; font-size: .95rem; text-align: center;
+  }
+  .emoji-text:focus { outline: none; border-color: var(--grape); }
+
+  .make-btn {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1rem;
+    color: #fff; background: var(--grape); border: none; border-radius: 13px;
+    padding: .75rem 1rem; cursor: pointer;
+    box-shadow: 0 5px 0 var(--grape-deep);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .make-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--grape-deep); }
+  .make-btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--grape-deep); }
+
+  .code-inline {
+    background: #2a2440; color: #e7e2ff;
+    border-radius: 11px; padding: .8rem 1rem;
+    font-family: "JetBrains Mono", monospace; font-size: .78rem; line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* peek */
+  .peek-wrap { padding: 0 clamp(1rem, 3vw, 2rem) 1.6rem; }
+  .peek-toggle {
+    display: flex; align-items: center; gap: .6rem; width: 100%;
+    background: var(--grape-soft); border: 2px solid var(--grape-soft);
+    border-radius: 14px; padding: .85rem 1.2rem; cursor: pointer;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .95rem; color: var(--grape-deep);
+    transition: border-color .15s, transform .1s;
+  }
+  .peek-toggle:hover { border-color: var(--grape); transform: translateY(-1px); }
+  .peek-toggle .arrow { margin-left: auto; transition: transform .25s; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; margin-top: .8rem; }
+  #code-peek-box.open { display: block; animation: fadeUp .3s ease; }
+
+  /* footer */
+  .lesson-footer {
+    max-width: 880px; margin: 2rem auto 0; text-align: center;
+    font-size: .82rem; color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .lesson-footer a { color: var(--grape-deep); text-decoration: none; font-weight: 600; }
+  .lesson-footer a:hover { text-decoration: underline; }
+  .footer-mark {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: .14em;
+    color: var(--grape); font-size: .95rem; display: block; margin-bottom: .3rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    html { scroll-behavior: auto; }
+  }
+
+</style>
+</head>
+<body>
+
+
+<header class="masthead">
+  <div class="eyebrow">Grades 4–6 · Computer Science · 45–60 min</div>
+    <div class="mast-pet">
+      <div class="pet-tank">
+        <canvas id="mascot" width="168" height="152"></canvas>
+      </div>
+      <span class="pet-name">click me!</span>
+    </div></div>
+  <h1>Your First Pet</h1>
+  <p>How do you tell a computer to draw something?</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept', this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-sandbox" onclick="switchTab('sandbox', this)" role="tab">Part 2 — Build It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="lead">How do you tell a computer to draw something?</p>
+    <p>When you use a drawing app, someone wrote code that told the computer exactly which pixels to color, and in what order. Today you're going to write that code yourself — and the thing you'll draw is a living, moving pet.</p>
+
+    <h2>What HTML is</h2>
+    <p>An HTML file is just a text file — but a special kind. When your browser opens it, it reads the instructions inside and builds what you see on screen. That's it. No magic.</p>
+    <p>The file has two parts: a <strong>head</strong> (invisible setup, like the title) and a <strong>body</strong> (everything you actually see). Inside the body, you put <em>elements</em> — tags that describe what should appear.</p>
+
+    <div class="editor">
+<span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;head&gt;</span>
+    <span class="tag">&lt;title&gt;</span>My Pet<span class="tag">&lt;/title&gt;</span>
+  <span class="tag">&lt;/head&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+    <span class="cmt">&lt;!-- everything visible goes here --&gt;</span>
+    <span class="tag">&lt;canvas</span> <span class="attr">id=</span><span class="str">"c"</span> <span class="attr">width=</span><span class="str">"300"</span> <span class="attr">height=</span><span class="str">"220"</span><span class="tag">&gt;&lt;/canvas&gt;</span>
+    <span class="tag">&lt;script&gt;</span>
+      <span class="cmt">// drawing code goes here</span>
+    <span class="tag">&lt;/script&gt;</span>
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span>
+    </div>
+
+    <h2>The canvas: your pet's home</h2>
+    <p>The <code style="background:#1e1e2e;color:#89dceb;padding:0.1em 0.4em;border-radius:4px;font-size:0.9em">&lt;canvas&gt;</code> element is like a blank whiteboard inside your browser. By itself it shows nothing. But once you connect it to JavaScript, you can draw any shape you want — circles, rectangles, text, gradients — one line of code at a time.</p>
+    <p>To start drawing, you ask the canvas for its "2D context" — think of it as picking up a paintbrush:</p>
+
+    <div class="editor">
+<span class="kw">const</span> canvas = document.getElementById(<span class="str">"c"</span>);
+<span class="kw">const</span> ctx    = canvas.getContext(<span class="str">"2d"</span>);  <span class="cmt">// ctx = your paintbrush</span>
+    </div>
+
+    <p>Now you can draw a circle using <strong>ctx.arc</strong>. Arc takes a center point (x, y), a radius, a start angle, and an end angle. A full circle goes from 0 to 2&pi;:</p>
+
+    <div class="editor">
+<span class="cmt">// Draw the body — a circle at center (150, 110), radius 50</span>
+ctx.beginPath();
+ctx.arc(<span class="num">150</span>, <span class="num">110</span>, <span class="num">50</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);
+ctx.fillStyle = <span class="str">"#6c63ff"</span>;
+ctx.fill();
+    </div>
+
+    <h2>Draw order: last goes on top</h2>
+    <p>The canvas draws like a painter — whatever you put down <em>later</em> appears on top of whatever was there before. So if you draw the body first and then draw the eyes, the eyes sit on top of the body. If you did it backwards, the body would cover the eyes.</p>
+
+    <div class="note">
+      <strong>The canvas draws in order.</strong> Whatever you draw last goes on top.
+    </div>
+
+    <p>Here's how you draw the body and then add two eyes on top:</p>
+
+    <div class="editor">
+<span class="cmt">// 1. Body first</span>
+ctx.beginPath();
+ctx.arc(<span class="num">150</span>, <span class="num">110</span>, <span class="num">50</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);
+ctx.fillStyle = <span class="str">"#6c63ff"</span>;
+ctx.fill();
+
+<span class="cmt">// 2. Eyes on top — drawn after, so they appear in front</span>
+[<span class="num">-18</span>, <span class="num">18</span>].forEach(<span class="kw">function</span>(offset) {
+  ctx.beginPath();
+  ctx.arc(<span class="num">150</span> + offset, <span class="num">100</span>, <span class="num">8</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);
+  ctx.fillStyle = <span class="str">"white"</span>;
+  ctx.fill();
+});
+    </div>
+
+    <h2>Making it move: requestAnimationFrame</h2>
+    <p>A single drawing is just a picture. To make it <em>animate</em>, you need to clear the canvas and redraw it over and over — so fast that your eye sees smooth motion, not individual frames.</p>
+    <p>The browser has a built-in tool for exactly this: <strong>requestAnimationFrame</strong>. You give it a function to call, and the browser calls that function right before it paints the next screen — about 60 times every second.</p>
+
+    <div class="note">
+      <strong>requestAnimationFrame</strong> calls your draw function ~60 times per second. That's animation.
+    </div>
+
+    <p>Here's the full animation loop. The pet moves left and right and bounces off the walls:</p>
+
+    <div class="editor">
+<span class="kw">let</span> x  = <span class="num">150</span>;   <span class="cmt">// starting position</span>
+<span class="kw">let</span> dx = <span class="num">2</span>;     <span class="cmt">// speed: pixels moved per frame</span>
+
+<span class="kw">function</span> draw() {
+  <span class="cmt">// clear the whole canvas before redrawing</span>
+  ctx.clearRect(<span class="num">0</span>, <span class="num">0</span>, canvas.width, canvas.height);
+
+  <span class="cmt">// draw body at current x</span>
+  ctx.beginPath();
+  ctx.arc(x, <span class="num">110</span>, <span class="num">50</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);
+  ctx.fillStyle = <span class="str">"#6c63ff"</span>;
+  ctx.fill();
+
+  <span class="cmt">// move x, bounce off left and right walls</span>
+  x += dx;
+  <span class="kw">if</span> (x &gt; canvas.width - <span class="num">50</span> || x &lt; <span class="num">50</span>) dx = -dx;
+
+  <span class="cmt">// ask the browser to call draw() again next frame</span>
+  requestAnimationFrame(draw);
+}
+
+draw(); <span class="cmt">// kick it off</span>
+    </div>
+
+    <p>That's really it. Three ideas — draw in order, clear and redraw, ask for the next frame — and you have animation.</p>
+    <p>When you're ready, click the button below to build your own moving pet.</p>
+
+    <button class="ready-btn" onclick="unlockSandbox()">I'm ready to build →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-sandbox" class="tab-section">
+
+  <div class="sandbox">
+
+    <!-- Stage -->
+    <div class="sandbox-stage">
+      <canvas id="c" width="300" height="220"></canvas>
+    </div>
+
+    <!-- Controls -->
+    <div class="builder">
+      <h3>Design your pet</h3>
+
+      <div class="control-group">
+        <label>Color</label>
+        <div class="color-row">
+          <input type="color" id="ctrl-color" value="#6c63ff">
+          <span class="color-swatch-label">Pick a body color.</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Size &nbsp;<span class="slider-val" id="val-size">40</span>px</label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-size" min="20" max="60" value="40">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Speed &nbsp;<span class="slider-val" id="val-speed">2</span></label>
+        <div class="slider-row">
+          <input type="range" id="ctrl-speed" min="1" max="8" value="2">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="ctrl-shape">Shape</label>
+        <select id="ctrl-shape">
+          <option value="blob">Blob (ellipse)</option>
+          <option value="round">Round (circle)</option>
+          <option value="boxy">Boxy (rounded rect)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="ctrl-eyes">Eye style</label>
+        <select id="ctrl-eyes">
+          <option value="dots">Dots</option>
+          <option value="big">Big Eyes</option>
+          <option value="sleepy">Sleepy</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Code peek -->
+  <div class="code-peek-section">
+    <button class="peek-toggle" id="peek-btn" onclick="togglePeek()">
+      <span>Peek at the code</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div id="code-peek-box">
+      <div class="editor" id="code-peek-content"></div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="lesson-footer">
+  Your First Pet &middot; Grades 4&ndash;6 &middot; Computer Science &middot;
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  &middot; <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────
+const pet = {
+  color: '#6c63ff',
+  size:  40,
+  speed: 2,
+  shape: 'blob',
+  eyes:  'dots',
+  // runtime
+  x:  150,
+  dx: 2,
+  t:  0,       // global tick for sin waves
+};
+
+// ── Canvas setup ───────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width;   // 300
+const H = canvas.height;  // 220
+
+// ── Controls wiring ────────────────────────────────────────────────
+document.getElementById('ctrl-color').addEventListener('input', function() {
+  pet.color = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-size').addEventListener('input', function() {
+  pet.size = parseInt(this.value, 10);
+  document.getElementById('val-size').textContent = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-speed').addEventListener('input', function() {
+  pet.speed = parseInt(this.value, 10);
+  // preserve direction, just change magnitude
+  pet.dx = pet.dx >= 0 ? pet.speed : -pet.speed;
+  document.getElementById('val-speed').textContent = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-shape').addEventListener('change', function() {
+  pet.shape = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-eyes').addEventListener('change', function() {
+  pet.eyes = this.value;
+  updateCodePeek();
+});
+
+// ── Drawing helpers ────────────────────────────────────────────────
+
+function drawBody(x, y, r, wobble, shape, color) {
+  ctx.beginPath();
+  if (shape === 'blob') {
+    // ellipse that squishes gently with wobble
+    ctx.ellipse(x, y, r + wobble, r - wobble * 0.6, 0, 0, Math.PI * 2);
+  } else if (shape === 'round') {
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+  } else {
+    // boxy: rounded rectangle
+    const s = r * 1.7;
+    const corner = r * 0.4;
+    ctx.roundRect(x - s / 2, y - s / 2, s, s, corner);
+  }
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawEyes(x, y, r, eyeStyle) {
+  // eye positions relative to center
+  const spread = r * 0.45;
+  const eyeY   = y - r * 0.2;
+
+  if (eyeStyle === 'dots') {
+    // simple filled dots
+    [-spread, spread].forEach(function(ox) {
+      ctx.beginPath();
+      ctx.arc(x + ox, eyeY, r * 0.13, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+    });
+
+  } else if (eyeStyle === 'big') {
+    // white sclera + dark pupil + shine
+    [-spread, spread].forEach(function(ox) {
+      ctx.beginPath();
+      ctx.arc(x + ox, eyeY, r * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(x + ox + r * 0.05, eyeY + r * 0.04, r * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(x + ox + r * 0.10, eyeY - r * 0.04, r * 0.05, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    });
+
+  } else {
+    // sleepy: half-closed — draw a white oval then clip the top half dark
+    [-spread, spread].forEach(function(ox) {
+      const ex = x + ox;
+      const ew = r * 0.22;
+      const eh = r * 0.14;
+
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeY, ew, eh, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+
+      // droopy eyelid — filled half-ellipse on top
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeY, ew, eh, 0, Math.PI, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      ctx.restore();
+
+      // pupil peeking out from under lid
+      ctx.beginPath();
+      ctx.arc(ex, eyeY + eh * 0.3, r * 0.08, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+    });
+  }
+}
+
+// ── Main draw function ─────────────────────────────────────────────
+
+function drawPet() {
+  pet.t += 0.05;
+
+  // clear
+  ctx.clearRect(0, 0, W, H);
+
+  // idle vertical bob — sin wave, small amplitude
+  const bobY = Math.sin(pet.t * 1.8) * 5;
+  const y    = H / 2 + bobY;
+
+  // wobble amount tied to speed so fast pets feel energetic
+  const wobble = Math.sin(pet.t * 3) * (pet.size * 0.08);
+
+  // draw body (shape drawn first)
+  drawBody(pet.x, y, pet.size, wobble, pet.shape, pet.color);
+
+  // eyes drawn after body — they appear on top
+  drawEyes(pet.x, y, pet.size, pet.eyes);
+
+  // move and bounce
+  pet.x += pet.dx;
+  const margin = pet.size * (pet.shape === 'boxy' ? 1.0 : 1.05);
+  if (pet.x > W - margin || pet.x < margin) {
+    pet.dx = -pet.dx;
+    pet.x  = Math.max(margin, Math.min(W - margin, pet.x));
+  }
+
+  requestAnimationFrame(drawPet);
+}
+
+// kick off the loop
+drawPet();
+
+// ── Code peek ─────────────────────────────────────────────────────
+
+function shapeCode(shape, r) {
+  if (shape === 'blob') {
+    return (
+      `ctx.ellipse(x, y, <span class="num">${r}</span>, <span class="num">${Math.round(r * 0.85)}</span>, <span class="num">0</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);`
+    );
+  } else if (shape === 'round') {
+    return `ctx.arc(x, y, <span class="num">${r}</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);`;
+  } else {
+    const s = Math.round(r * 1.7);
+    const corner = Math.round(r * 0.4);
+    return `ctx.roundRect(x - <span class="num">${Math.round(s/2)}</span>, y - <span class="num">${Math.round(s/2)}</span>, <span class="num">${s}</span>, <span class="num">${s}</span>, <span class="num">${corner}</span>);`;
+  }
+}
+
+function eyeComment(style) {
+  const map = {
+    dots:   'simple dot eyes',
+    big:    'big eyes with pupils and shine',
+    sleepy: 'droopy half-closed eyes',
+  };
+  return map[style] || style;
+}
+
+function updateCodePeek() {
+  const el  = document.getElementById('code-peek-content');
+  const r   = pet.size;
+  const spd = pet.speed;
+  const col = pet.color;
+
+  el.innerHTML =
+    `<span class="cmt">// --- body color and size ---</span>\n` +
+    `ctx.fillStyle = <span class="str">"${col}"</span>;\n` +
+    `${shapeCode(pet.shape, r)}\n` +
+    `ctx.fill();\n\n` +
+    `<span class="cmt">// --- eyes: ${eyeComment(pet.eyes)} ---</span>\n` +
+    `<span class="cmt">// drawn after body so they appear on top</span>\n` +
+    `ctx.arc(x - <span class="num">${Math.round(r * 0.45)}</span>, eyeY, <span class="num">${Math.round(r * 0.13)}</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);\n` +
+    `ctx.arc(x + <span class="num">${Math.round(r * 0.45)}</span>, eyeY, <span class="num">${Math.round(r * 0.13)}</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);\n\n` +
+    `<span class="cmt">// --- animation loop ---</span>\n` +
+    `<span class="kw">let</span> x  = <span class="num">150</span>;   <span class="cmt">// starting x position</span>\n` +
+    `<span class="kw">let</span> dx = <span class="num">${spd}</span>;     <span class="cmt">// speed: pixels per frame</span>\n\n` +
+    `x += dx;  <span class="cmt">// move each frame</span>\n` +
+    `<span class="kw">if</span> (x &gt; canvas.width - <span class="num">${r}</span> || x &lt; <span class="num">${r}</span>) dx = -dx;\n\n` +
+    `requestAnimationFrame(draw);  <span class="cmt">// ~60 times per second</span>`;
+}
+
+function togglePeek() {
+  var box  = document.getElementById('code-peek-box');
+  var btn  = document.getElementById('peek-btn');
+  var open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) updateCodePeek();
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  var btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+updateCodePeek();
+</script>
+
+<script>
+'use strict';
+
+
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────────
+const pet = {
+  color: '#6c63ff',
+  size:  40,
+  speed: 2,
+  shape: 'blob',
+  eyes:  'dots',
+  // runtime
+  x:  150,
+  dx: 2,
+  t:  0,       // global tick for sin waves
+};
+
+// ── Canvas setup ───────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const W = canvas.width;   // 300
+const H = canvas.height;  // 220
+
+// ── Controls wiring ────────────────────────────────────────────────
+document.getElementById('ctrl-color').addEventListener('input', function() {
+  pet.color = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-size').addEventListener('input', function() {
+  pet.size = parseInt(this.value, 10);
+  document.getElementById('val-size').textContent = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-speed').addEventListener('input', function() {
+  pet.speed = parseInt(this.value, 10);
+  // preserve direction, just change magnitude
+  pet.dx = pet.dx >= 0 ? pet.speed : -pet.speed;
+  document.getElementById('val-speed').textContent = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-shape').addEventListener('change', function() {
+  pet.shape = this.value;
+  updateCodePeek();
+});
+
+document.getElementById('ctrl-eyes').addEventListener('change', function() {
+  pet.eyes = this.value;
+  updateCodePeek();
+});
+
+// ── Drawing helpers ────────────────────────────────────────────────
+
+function drawBody(x, y, r, wobble, shape, color) {
+  ctx.beginPath();
+  if (shape === 'blob') {
+    // ellipse that squishes gently with wobble
+    ctx.ellipse(x, y, r + wobble, r - wobble * 0.6, 0, 0, Math.PI * 2);
+  } else if (shape === 'round') {
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+  } else {
+    // boxy: rounded rectangle
+    const s = r * 1.7;
+    const corner = r * 0.4;
+    ctx.roundRect(x - s / 2, y - s / 2, s, s, corner);
+  }
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawEyes(x, y, r, eyeStyle) {
+  // eye positions relative to center
+  const spread = r * 0.45;
+  const eyeY   = y - r * 0.2;
+
+  if (eyeStyle === 'dots') {
+    // simple filled dots
+    [-spread, spread].forEach(function(ox) {
+      ctx.beginPath();
+      ctx.arc(x + ox, eyeY, r * 0.13, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+    });
+
+  } else if (eyeStyle === 'big') {
+    // white sclera + dark pupil + shine
+    [-spread, spread].forEach(function(ox) {
+      ctx.beginPath();
+      ctx.arc(x + ox, eyeY, r * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(x + ox + r * 0.05, eyeY + r * 0.04, r * 0.12, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(x + ox + r * 0.10, eyeY - r * 0.04, r * 0.05, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+    });
+
+  } else {
+    // sleepy: half-closed — draw a white oval then clip the top half dark
+    [-spread, spread].forEach(function(ox) {
+      const ex = x + ox;
+      const ew = r * 0.22;
+      const eh = r * 0.14;
+
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeY, ew, eh, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+
+      // droopy eyelid — filled half-ellipse on top
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(ex, eyeY, ew, eh, 0, Math.PI, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      ctx.restore();
+
+      // pupil peeking out from under lid
+      ctx.beginPath();
+      ctx.arc(ex, eyeY + eh * 0.3, r * 0.08, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+    });
+  }
+}
+
+// ── Main draw function ─────────────────────────────────────────────
+
+function drawPet() {
+  pet.t += 0.05;
+
+  // clear
+  ctx.clearRect(0, 0, W, H);
+
+  // idle vertical bob — sin wave, small amplitude
+  const bobY = Math.sin(pet.t * 1.8) * 5;
+  const y    = H / 2 + bobY;
+
+  // wobble amount tied to speed so fast pets feel energetic
+  const wobble = Math.sin(pet.t * 3) * (pet.size * 0.08);
+
+  // draw body (shape drawn first)
+  drawBody(pet.x, y, pet.size, wobble, pet.shape, pet.color);
+
+  // eyes drawn after body — they appear on top
+  drawEyes(pet.x, y, pet.size, pet.eyes);
+
+  // move and bounce
+  pet.x += pet.dx;
+  const margin = pet.size * (pet.shape === 'boxy' ? 1.0 : 1.05);
+  if (pet.x > W - margin || pet.x < margin) {
+    pet.dx = -pet.dx;
+    pet.x  = Math.max(margin, Math.min(W - margin, pet.x));
+  }
+
+  requestAnimationFrame(drawPet);
+}
+
+// kick off the loop
+drawPet();
+
+// ── Code peek ─────────────────────────────────────────────────────
+
+function shapeCode(shape, r) {
+  if (shape === 'blob') {
+    return (
+      `ctx.ellipse(x, y, <span class="num">${r}</span>, <span class="num">${Math.round(r * 0.85)}</span>, <span class="num">0</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);`
+    );
+  } else if (shape === 'round') {
+    return `ctx.arc(x, y, <span class="num">${r}</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);`;
+  } else {
+    const s = Math.round(r * 1.7);
+    const corner = Math.round(r * 0.4);
+    return `ctx.roundRect(x - <span class="num">${Math.round(s/2)}</span>, y - <span class="num">${Math.round(s/2)}</span>, <span class="num">${s}</span>, <span class="num">${s}</span>, <span class="num">${corner}</span>);`;
+  }
+}
+
+function eyeComment(style) {
+  const map = {
+    dots:   'simple dot eyes',
+    big:    'big eyes with pupils and shine',
+    sleepy: 'droopy half-closed eyes',
+  };
+  return map[style] || style;
+}
+
+function updateCodePeek() {
+  const el  = document.getElementById('code-peek-content');
+  const r   = pet.size;
+  const spd = pet.speed;
+  const col = pet.color;
+
+  el.innerHTML =
+    `<span class="cmt">// --- body color and size ---</span>\n` +
+    `ctx.fillStyle = <span class="str">"${col}"</span>;\n` +
+    `${shapeCode(pet.shape, r)}\n` +
+    `ctx.fill();\n\n` +
+    `<span class="cmt">// --- eyes: ${eyeComment(pet.eyes)} ---</span>\n` +
+    `<span class="cmt">// drawn after body so they appear on top</span>\n` +
+    `ctx.arc(x - <span class="num">${Math.round(r * 0.45)}</span>, eyeY, <span class="num">${Math.round(r * 0.13)}</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);\n` +
+    `ctx.arc(x + <span class="num">${Math.round(r * 0.45)}</span>, eyeY, <span class="num">${Math.round(r * 0.13)}</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>);\n\n` +
+    `<span class="cmt">// --- animation loop ---</span>\n` +
+    `<span class="kw">let</span> x  = <span class="num">150</span>;   <span class="cmt">// starting x position</span>\n` +
+    `<span class="kw">let</span> dx = <span class="num">${spd}</span>;     <span class="cmt">// speed: pixels per frame</span>\n\n` +
+    `x += dx;  <span class="cmt">// move each frame</span>\n` +
+    `<span class="kw">if</span> (x &gt; canvas.width - <span class="num">${r}</span> || x &lt; <span class="num">${r}</span>) dx = -dx;\n\n` +
+    `requestAnimationFrame(draw);  <span class="cmt">// ~60 times per second</span>`;
+}
+
+function togglePeek() {
+  var box  = document.getElementById('code-peek-box');
+  var btn  = document.getElementById('peek-btn');
+  var open = box.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) updateCodePeek();
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  var btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Build It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+updateCodePeek();
+
+
+function paintCreature(g, o) {
+  var col = o.color || '#7c4dff';
+  var mood = o.mood || 'neutral';   // happy | sad | tired | neutral
+  var t = o.t || 0;
+  g.save();
+  g.translate(o.x, o.y);
+  var s = o.scale || 1; g.scale(s, s);
+
+  var wobble = Math.sin(t * 1.4) * 2;
+
+  // body
+  g.beginPath();
+  g.ellipse(0, 0, 52 + wobble, 58 - wobble * 0.5, 0, 0, Math.PI * 2);
+  g.fillStyle = col; g.fill();
+
+  // belly
+  g.beginPath();
+  g.ellipse(0, 16, 30, 26, 0, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(255,255,255,0.16)'; g.fill();
+
+  // sheen
+  g.beginPath();
+  g.ellipse(-12, -16, 16, 12, -0.3, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(255,255,255,0.22)'; g.fill();
+
+  // sad cheeks (tear-shadow)
+  if (mood === 'sad') {
+    [[-22, 10], [22, 10]].forEach(function(pt) {
+      g.beginPath(); g.ellipse(pt[0], pt[1], 11, 7, 0, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(0,0,0,0.12)'; g.fill();
+    });
+  }
+  // happy blush
+  if (mood === 'happy') {
+    [[-24, 8], [24, 8]].forEach(function(pt) {
+      g.beginPath(); g.ellipse(pt[0], pt[1], 9, 6, 0, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(255,93,143,0.45)'; g.fill();
+    });
+  }
+
+  // eyes
+  var eyeY = -8;
+  var droopy = (mood === 'sad' || mood === 'tired');
+  var fullH = droopy ? 3 : 10;
+  var eyeH = o.blink ? 1.5 : fullH;
+  [[-18, eyeY], [18, eyeY]].forEach(function(pt) {
+    var ex = pt[0], ey = pt[1];
+    g.beginPath(); g.ellipse(ex, ey, 10, eyeH, 0, 0, Math.PI * 2);
+    g.fillStyle = 'white'; g.fill();
+    if (eyeH > 3) {
+      g.beginPath(); g.arc(ex + 2, ey + 1, 5, 0, Math.PI * 2);
+      g.fillStyle = '#231c3a'; g.fill();
+      g.beginPath(); g.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      g.fillStyle = 'white'; g.fill();
+    }
+  });
+
+  // mouth
+  g.beginPath();
+  g.strokeStyle = 'rgba(0,0,0,0.32)';
+  g.lineWidth = 2.5; g.lineCap = 'round';
+  if (mood === 'sad') {
+    g.arc(0, 30, 12, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (mood === 'happy') {
+    g.arc(0, 14, 14, 0.2, Math.PI - 0.2);
+  } else {
+    g.moveTo(-9, 22); g.lineTo(9, 22);
+  }
+  g.stroke();
+
+  g.restore();
+}
+
+/* ═══════════════ blink scheduler (shared) ═══════════════ */
+var blinking = 0, blinkCd = 90;
+function tickBlink() {
+  if (blinking > 0) { blinking--; }
+  else { blinkCd--; if (blinkCd <= 0) { blinking = 7; blinkCd = 130 + Math.floor(Math.random() * 200); } }
+}
+
+/* ═══════════════ header mascot ═══════════════ */
+(function mascot() {
+  var cv = document.getElementById('mascot');
+  if (!cv) return;
+  var g = cv.getContext('2d');
+  var W = cv.width, H = cv.height, mt = 0;
+  cv.addEventListener('click', function() { hop = 10; });
+  var hop = 0;
+  function loop() {
+    mt += 0.04; tickBlink();
+    if (hop > 0) hop -= 0.5;
+    g.clearRect(0, 0, W, H);
+    var bob = Math.sin(mt * 1.7) * 4 - (hop > 0 ? Math.sin((10 - hop) / 10 * Math.PI) * 16 : 0);
+    paintCreature(g, { x: W / 2, y: H / 2 + 14 + bob, scale: 0.72, mood: 'happy', t: mt, blink: blinking > 0, color: '#7c4dff' });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ═══════════════ emoji map ═══════════════ */
+var EMOJIS = [
+  '⭐','🍎','🍕','🍩','🎂','🍓','🥕','🌮',
+  '✨','💛','💜','❤️','💚','💙','🧡','🤍',
+  '💤','💫','🎵','🎉','🎈','🎁','🌈','☀️',
+  '🐾','🐟','🦋','🌸','🍄','🌙','⚡','🔥',
+  '😊','😴','🥺','😎','🤩','🥳','😋','🤔'
+];
+
+</script>
+</body>
+</html>

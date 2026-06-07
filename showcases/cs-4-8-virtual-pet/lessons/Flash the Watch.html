@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flash the Watch — CS 6–8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* ── paper + ink ── */
+    --paper:    #f6efe1;   /* warm cream page */
+    --paper-2:  #fffdf8;   /* card surface */
+    --ink:      #2c2440;   /* deep grape charcoal */
+    --ink-soft: #6f6685;
+    --line:     #e6dcc6;   /* warm hairline */
+
+    /* ── brand ── */
+    --grape:      #7c4dff;
+    --grape-deep: #5a32cc;
+    --grape-soft: #efe9ff;
+    --tang:       #ff7a4d;
+    --tang-deep:  #d9532a;
+    --tang-soft:  #ffe7da;
+
+    /* ── stat semantics ── */
+    --mint:  #16c79a;  --mint-deep:#0f9a76;   /* food   */
+    --sun:   #ffc23d;  --sun-deep: #d99300;   /* happy  */
+    --sky:   #3da5ff;  --sky-deep: #1f7ad6;   /* energy */
+    --bubble:#ff5d8f;
+
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow-soft: 0 1px 0 rgba(44,36,64,.04), 0 18px 36px -22px rgba(44,36,64,.45);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Lexend", system-ui, sans-serif;
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, rgba(124,77,255,.10) 1.3px, transparent 1.4px);
+    background-size: 24px 24px;
+    background-position: -2px -2px;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 3rem;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ══════════════════════════════ MASTHEAD ══════════════════════════════ */
+  .masthead {
+    position: relative;
+    max-width: 880px;
+    margin: 1.5rem auto 0;
+    background: var(--grape);
+    color: #fff;
+    border-radius: 26px;
+    padding: 2.1rem 2.2rem;
+    overflow: hidden;
+    box-shadow: 0 6px 0 var(--grape-deep), 0 30px 50px -28px rgba(90,50,204,.8);
+  }
+  .masthead::before {  /* dotted texture */
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.4px, transparent 1.5px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+  .mast-grid {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  @media (max-width: 600px) {
+    .mast-grid { grid-template-columns: 1fr; }
+    .masthead { padding: 1.6rem 1.4rem; }
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: var(--sun);
+    color: #4a3700;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .35rem .8rem;
+    border-radius: 100px;
+    transform: rotate(-1.5deg);
+    box-shadow: 0 3px 0 var(--sun-deep);
+  }
+  .mast-left h1 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.1rem, 6vw, 3.1rem);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    margin: .85rem 0 .55rem;
+  }
+  .mast-left h1 .amp { color: var(--sun); font-style: italic; }
+  .bigq {
+    font-size: clamp(1.05rem, 2.4vw, 1.22rem);
+    line-height: 1.45;
+    color: rgba(255,255,255,.9);
+    max-width: 30ch;
+  }
+  .bigq em { color: var(--sun); font-style: normal; font-weight: 600; }
+  .mast-trail {
+    margin-top: 1rem;
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .82rem; color: rgba(255,255,255,.72);
+    font-weight: 500;
+  }
+  .mast-trail .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--tang); }
+
+  /* pet tank */
+  .mast-pet { display: flex; flex-direction: column; align-items: center; gap: .55rem; }
+  .pet-tank {
+    position: relative;
+    width: 168px; height: 152px;
+    background: var(--paper-2);
+    border-radius: 22px;
+    box-shadow: inset 0 0 0 4px rgba(255,255,255,.5), 0 8px 0 rgba(0,0,0,.12);
+    overflow: hidden;
+  }
+  .pet-tank::after {  /* little floor shadow */
+    content:""; position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    width: 84px; height: 14px; border-radius: 50%;
+    background: rgba(44,36,64,.10);
+    filter: blur(1px);
+  }
+  #mascot { position: relative; z-index: 1; display: block; }
+  .pet-name {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700; font-size: .8rem;
+    background: #fff; color: var(--grape);
+    padding: .25rem .8rem; border-radius: 100px;
+    transform: rotate(2deg);
+    box-shadow: 0 3px 0 rgba(0,0,0,.15);
+  }
+
+  /* ══════════════════════════════ TABS ══════════════════════════════ */
+  .tabs {
+    max-width: 880px;
+    margin: 1.4rem auto 0;
+    padding: 0 .4rem;
+    display: flex;
+    gap: .6rem;
+  }
+  .tab-btn {
+    flex: 1;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 16px 16px 0 0;
+    padding: .85rem 1rem;
+    cursor: pointer;
+    transition: transform .12s ease, color .15s, background .15s, border-color .15s;
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+  }
+  .tab-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--line); color: var(--ink-soft);
+    font-size: .82rem; flex-shrink: 0;
+    transition: background .15s, color .15s;
+  }
+  .tab-btn:hover:not(.locked):not(.active) { color: var(--ink); transform: translateY(-2px); }
+  .tab-btn.active {
+    color: var(--grape);
+    background: var(--paper-2);
+    border-color: var(--grape);
+    border-bottom-color: var(--paper-2);
+    box-shadow: 0 -4px 0 var(--grape-soft) inset;
+  }
+  .tab-btn.active .tab-num { background: var(--grape); color: #fff; }
+  .tab-btn.locked { opacity: .55; cursor: not-allowed; }
+  .tab-lock { font-size: .9rem; }
+
+  /* ══════════════════════════════ SHEET ══════════════════════════════ */
+  .sheet {
+    max-width: 880px;
+    margin: 0 auto;
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 0 0 24px 24px;
+    box-shadow: var(--shadow-soft);
+  }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ── lesson content ── */
+  .lesson-content { padding: 2.2rem clamp(1.25rem, 4vw, 2.8rem) 2.6rem; }
+
+  .lead {
+    font-size: 1.16rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin-bottom: 1.8rem;
+  }
+  .lead .hl { background: linear-gradient(transparent 62%, var(--sun) 62%); padding: 0 .1em; }
+
+  .sec-head {
+    display: flex; align-items: center; gap: .7rem;
+    margin: 2.4rem 0 .9rem;
+  }
+  .sec-head:first-child { margin-top: 0; }
+  .sec-num {
+    flex-shrink: 0;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: var(--grape); color: #fff;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .92rem;
+    transform: rotate(-4deg);
+    box-shadow: 0 3px 0 var(--grape-deep);
+  }
+  .sec-head h2 {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 700;
+    font-size: 1.42rem;
+    letter-spacing: -.01em;
+    color: var(--ink);
+  }
+  .lesson-content p { margin-bottom: 1.05rem; }
+  .lesson-content p code, .lesson-content li code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: .86em;
+    background: var(--grape-soft);
+    color: var(--grape-deep);
+    padding: .1em .42em;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  .lesson-content ul { margin: .4rem 0 1.1rem 0; list-style: none; }
+  .lesson-content li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin-bottom: .55rem;
+  }
+  .lesson-content li::before {
+    content: "›";
+    position: absolute; left: .35rem; top: -.05rem;
+    color: var(--tang); font-weight: 700; font-size: 1.1rem;
+  }
+
+  /* ── editor code window ── */
+  .editor {
+    margin: 1.1rem 0 1.4rem;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #2a2440;
+    box-shadow: 0 4px 0 rgba(44,36,64,.25), 0 22px 40px -26px rgba(44,36,64,.8);
+  }
+  .editor-bar {
+    display: flex; align-items: center; gap: .5rem;
+    padding: .6rem .9rem;
+    background: #221d36;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .editor-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .editor-bar .dot.r { background: var(--tang); }
+  .editor-bar .dot.y { background: var(--sun); }
+  .editor-bar .dot.g { background: var(--mint); }
+  .editor-file {
+    margin-left: .5rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .76rem; font-weight: 500;
+    color: rgba(255,255,255,.5);
+    letter-spacing: .02em;
+  }
+  .editor-tag {
+    margin-left: auto;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: rgba(255,255,255,.32);
+  }
+  .editor-body {
+    padding: 1.05rem 1.25rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: .85rem;
+    line-height: 1.75;
+    color: #e7e2ff;
+    overflow-x: auto;
+  }
+  .kw  { color: #c4b5ff; }
+  .str { color: #5fe3c0; }
+  .num { color: #ffb27a; }
+  .cmt { color: #7a7196; font-style: italic; }
+  .fn  { color: #7ec8ff; }
+
+  /* ── sticky note callout ── */
+  .note {
+    position: relative;
+    background: var(--sun);
+    color: #4a3700;
+    border-radius: 4px 12px 12px 12px;
+    padding: 1.15rem 1.3rem 1.2rem;
+    margin: 1.5rem 0;
+    box-shadow: 0 10px 24px -14px rgba(217,147,0,.8);
+    transform: rotate(-.5deg);
+  }
+  .note::before {  /* tape */
+    content: "";
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+    width: 78px; height: 20px;
+    background: rgba(255,255,255,.45);
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+  .note strong { font-family: "Bricolage Grotesque", sans-serif; }
+  .note.note--grape { background: var(--grape-soft); color: var(--grape-deep); box-shadow: 0 10px 24px -14px rgba(124,77,255,.6); }
+  .note.note--grape::before { background: rgba(124,77,255,.22); }
+
+  /* ── ask / think prompt ── */
+  .ask {
+    display: flex; gap: .8rem; align-items: flex-start;
+    background: var(--tang-soft);
+    border: 2px dashed var(--tang);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    margin: 1.4rem 0;
+  }
+  .ask .q {
+    flex-shrink: 0;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800;
+    color: var(--tang-deep);
+    font-size: 1.3rem; line-height: 1;
+    margin-top: .1rem;
+  }
+  .ask p { margin: 0 !important; color: #7a3d22; font-size: .98rem; }
+
+  /* ── ready button ── */
+  .ready-wrap { text-align: center; margin-top: 2.6rem; }
+  .ready-btn {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800; font-size: 1.12rem;
+    color: #fff; background: var(--tang);
+    border: none; border-radius: 16px;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--tang-deep);
+    transition: transform .1s ease, box-shadow .1s ease;
+    display: inline-flex; align-items: center; gap: .6rem;
+  }
+  .ready-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--tang-deep); }
+  .ready-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--tang-deep); }
+  .ready-sub { margin-top: .8rem; font-size: .85rem; color: var(--ink-soft); }
+
+  /* ══════════════════════════════ SANDBOX ══════════════════════════════ */
+  .sandbox {
+    padding: 1.8rem clamp(1rem, 3vw, 2rem) 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+  @media (min-width: 720px) { .sandbox { grid-template-columns: 300px 1fr; align-items: start; } }
+
+  /* device */
+  .device {
+    background: var(--grape);
+    border-radius: 24px;
+    padding: 1.1rem;
+    box-shadow: 0 6px 0 var(--grape-deep), 0 26px 44px -28px rgba(90,50,204,.8);
+    position: relative;
+  }
+  .device-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: .1rem .3rem .7rem;
+    color: rgba(255,255,255,.85);
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .82rem; letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .device-top .led { display: inline-flex; gap: 5px; }
+  .device-top .led i { width: 8px; height: 8px; border-radius: 50%; background: var(--sun); display: inline-block; }
+  .device-top .led i:nth-child(2){ background: var(--mint); }
+  .device-top .led i:nth-child(3){ background: var(--tang); }
+  .screen {
+    background: #fdf3e7;
+    border-radius: 16px;
+    padding: .6rem;
+    box-shadow: inset 0 2px 8px rgba(44,36,64,.18);
+  }
+  #c { display: block; width: 100%; height: auto; border-radius: 11px; background: transparent; }
+  .mood-caption {
+    text-align: center;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .9rem; color: var(--grape-deep);
+    background: #fff;
+    margin: .55rem .2rem 0;
+    padding: .35rem; border-radius: 10px;
+  }
+
+  .stat-bars { margin: .9rem .2rem .2rem; display: flex; flex-direction: column; gap: .55rem; }
+  .stat-row { display: flex; align-items: center; gap: .55rem; }
+  .stat-label {
+    width: 54px; flex-shrink: 0;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .76rem; color: #fff; letter-spacing: .02em;
+  }
+  .stat-track {
+    flex: 1; height: 13px;
+    background: rgba(0,0,0,.22);
+    border-radius: 100px; overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.25);
+  }
+  .stat-fill { height: 100%; border-radius: 100px; transition: width .4s cubic-bezier(.34,1.3,.5,1); position: relative; }
+  .stat-fill::after { content:""; position:absolute; top:2px; left:5px; right:5px; height:3px; border-radius:100px; background:rgba(255,255,255,.4); }
+  .stat-fill.food   { background: var(--mint); }
+  .stat-fill.happy  { background: var(--sun); }
+  .stat-fill.energy { background: var(--sky); }
+  .stat-pct { width: 34px; text-align: right; font-size: .76rem; font-weight: 600; color: rgba(255,255,255,.8); flex-shrink: 0; }
+
+  .action-btns { display: flex; gap: .5rem; margin: .9rem .2rem .1rem; }
+  .action-btn {
+    flex: 1;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .92rem;
+    border: none; border-radius: 13px;
+    padding: .7rem .4rem;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .action-btn:active { transform: translateY(4px); }
+  .btn-feed { background: var(--mint); color: #053a2d; box-shadow: 0 4px 0 var(--mint-deep); }
+  .btn-feed:active { box-shadow: 0 0 0 var(--mint-deep); }
+  .btn-play { background: var(--sun); color: #4a3700; box-shadow: 0 4px 0 var(--sun-deep); }
+  .btn-play:active { box-shadow: 0 0 0 var(--sun-deep); }
+  .btn-rest { background: var(--sky); color: #06294d; box-shadow: 0 4px 0 var(--sky-deep); }
+  .btn-rest:active { box-shadow: 0 0 0 var(--sky-deep); }
+
+  /* builder bench */
+  .builder {
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    border-radius: 18px;
+    padding: 1.3rem;
+    display: flex; flex-direction: column; gap: 1.05rem;
+  }
+  .builder-head {
+    display: flex; align-items: center; gap: .6rem;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800;
+    font-size: 1.15rem; color: var(--ink);
+    padding-bottom: .75rem; border-bottom: 2px solid var(--line);
+  }
+  .builder-head .chip {
+    background: var(--tang); color: #fff; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+    padding: .2rem .55rem; border-radius: 100px; box-shadow: 0 2px 0 var(--tang-deep);
+  }
+  .ctl { display: flex; flex-direction: column; gap: .4rem; }
+  .ctl > label {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .ctl select {
+    width: 100%; padding: .6rem .7rem;
+    border: 2px solid var(--line); border-radius: 11px;
+    font-family: "Lexend", sans-serif; font-size: .95rem; color: var(--ink);
+    background: var(--paper); cursor: pointer;
+    transition: border-color .15s;
+  }
+  .ctl select:focus { outline: none; border-color: var(--grape); }
+  .slider-val {
+    font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--grape);
+    background: var(--grape-soft); padding: .05rem .5rem; border-radius: 7px; font-size: .85rem;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--grape); cursor: pointer; height: 22px; }
+
+  .dir-row { display: flex; gap: .5rem; }
+  .dir-btn {
+    flex: 1; padding: .55rem;
+    border: 2px solid var(--line); border-radius: 11px;
+    background: var(--paper); cursor: pointer;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .9rem; color: var(--ink-soft);
+    transition: border-color .12s, background .12s, color .12s, transform .1s;
+  }
+  .dir-btn:hover { transform: translateY(-1px); }
+  .dir-btn.selected { border-color: var(--grape); background: var(--grape-soft); color: var(--grape-deep); }
+
+  .emoji-map { display: flex; flex-wrap: wrap; gap: 5px; }
+  .emoji-chip {
+    font-size: 1.25rem; line-height: 1; padding: 5px 6px;
+    border-radius: 9px; cursor: pointer;
+    background: var(--paper); border: 2px solid var(--line);
+    transition: border-color .1s, background .1s, transform .1s;
+    user-select: none;
+  }
+  .emoji-chip:hover { border-color: var(--grape); transform: translateY(-2px) scale(1.05); }
+  .emoji-chip.selected { border-color: var(--grape); background: var(--grape-soft); }
+  .emoji-text {
+    width: 100%; margin-top: 6px; padding: .45rem .6rem;
+    border: 2px solid var(--line); border-radius: 10px;
+    font-family: "Lexend", sans-serif; font-size: .95rem; text-align: center;
+  }
+  .emoji-text:focus { outline: none; border-color: var(--grape); }
+
+  .make-btn {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 1rem;
+    color: #fff; background: var(--grape); border: none; border-radius: 13px;
+    padding: .75rem 1rem; cursor: pointer;
+    box-shadow: 0 5px 0 var(--grape-deep);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .make-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--grape-deep); }
+  .make-btn:active { transform: translateY(5px); box-shadow: 0 0 0 var(--grape-deep); }
+
+  .code-inline {
+    background: #2a2440; color: #e7e2ff;
+    border-radius: 11px; padding: .8rem 1rem;
+    font-family: "JetBrains Mono", monospace; font-size: .78rem; line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* peek */
+  .peek-wrap { padding: 0 clamp(1rem, 3vw, 2rem) 1.6rem; }
+  .peek-toggle {
+    display: flex; align-items: center; gap: .6rem; width: 100%;
+    background: var(--grape-soft); border: 2px solid var(--grape-soft);
+    border-radius: 14px; padding: .85rem 1.2rem; cursor: pointer;
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: .95rem; color: var(--grape-deep);
+    transition: border-color .15s, transform .1s;
+  }
+  .peek-toggle:hover { border-color: var(--grape); transform: translateY(-1px); }
+  .peek-toggle .arrow { margin-left: auto; transition: transform .25s; }
+  .peek-toggle.open .arrow { transform: rotate(180deg); }
+  #code-peek-box { display: none; margin-top: .8rem; }
+  #code-peek-box.open { display: block; animation: fadeUp .3s ease; }
+
+  /* footer */
+  .lesson-footer {
+    max-width: 880px; margin: 2rem auto 0; text-align: center;
+    font-size: .82rem; color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .lesson-footer a { color: var(--grape-deep); text-decoration: none; font-weight: 600; }
+  .lesson-footer a:hover { text-decoration: underline; }
+  .footer-mark {
+    font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: .14em;
+    color: var(--grape); font-size: .95rem; display: block; margin-bottom: .3rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    html { scroll-behavior: auto; }
+  }
+
+</style>
+</head>
+<body>
+
+
+<header class="masthead">
+  <div class="eyebrow">Grades 6–8 · Computer Science · Hardware</div>
+    <div class="mast-pet">
+      <div class="pet-tank">
+        <canvas id="mascot" width="168" height="152"></canvas>
+      </div>
+      <span class="pet-name">click me!</span>
+    </div></div>
+  <h1>Flash the Watch</h1>
+  <p>Your pet lives in a browser. What does it take to move it into a device you can wear?</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" onclick="switchTab('concept',this)" role="tab">Part 1 — The Concept</button>
+  <button class="tab-btn locked" id="tab-btn-sandbox" onclick="switchTab('sandbox',this)" role="tab">Part 2 — Run It 🔒</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ PART 1 -->
+<section id="tab-concept" class="tab-section active">
+  <div class="lesson-content">
+
+    <p class="lead">What's the difference between code that runs in a browser and code that runs in a watch?</p>
+    <p>Your pet has been living in a browser tab. The browser is doing a lot of invisible work for you — it handles the screen, the touch events, the memory. It's a translator between your code and the hardware.</p>
+    <p>When you program a microcontroller directly, you remove the translator. You talk to the hardware yourself.</p>
+
+    <h2>What is a microcontroller?</h2>
+    <p>A microcontroller is a tiny computer on a single chip — processor, memory, and connections to hardware all in one. The watch uses an <strong>ESP32-S3</strong>: fast enough to run a game, small enough to fit in a wristband, cheap enough to put in a classroom project.</p>
+    <p>Unlike your laptop, a microcontroller has no operating system. When it turns on, it runs one program — your program — in a loop, forever. There is no file system to open, no browser to launch. Just:</p>
+
+    <div class="editor">
+<span class="fn">setup</span>();   <span class="cmt">// runs once when the watch turns on</span>
+
+<span class="kw">while</span> (<span class="kw">true</span>) {
+  <span class="fn">loop</span>();  <span class="cmt">// runs forever, as fast as the chip allows</span>
+}</div>
+
+    <h2>Two languages, one idea</h2>
+    <p>The pet's logic — what makes it hungry, what makes it happy — doesn't change when you move to hardware. The language does.</p>
+
+    <div class="compare">
+      <div>
+        <div class="compare-label label-js">JavaScript (browser)</div>
+        <div class="editor"><span class="kw">let</span> food = <span class="num">80</span>;
+
+<span class="kw">function</span> <span class="fn">feed</span>() {
+  food = <span class="fn">Math</span>.<span class="fn">min</span>(
+    <span class="num">100</span>,
+    food + <span class="num">20</span>
+  );
+  <span class="fn">draw</span>();
+}</div>
+      </div>
+      <div>
+        <div class="compare-label label-cpp">C++ (watch)</div>
+        <div class="editor"><span class="ty">int</span> food = <span class="num">80</span>;
+
+<span class="ty">void</span> <span class="fn">feed</span>() {
+  food = <span class="fn">min</span>(
+    <span class="num">100</span>,
+    food + <span class="num">20</span>
+  );
+  <span class="fn">draw</span>();
+}</div>
+      </div>
+    </div>
+
+    <p>Same logic, same function name, same <code>min()</code>. The differences: <code>let</code> becomes <code>int</code> (you declare the type), <code>function</code> becomes <code>void</code> (you declare what the function returns). The thinking is identical.</p>
+
+    <div class="note">
+      <strong>Why declare the type?</strong> JavaScript figures out at runtime whether <code>food</code> is a number or a string. C++ needs to know at compile time — before the code ever runs — because it's being translated directly into machine instructions. Knowing the type makes that translation possible.
+    </div>
+
+    <h2>The display: talking to hardware directly</h2>
+    <p>In a browser, you draw with <code>canvas.fillRect()</code> and the browser handles everything between your code and the screen. On the watch, you talk to the display chip directly via a <strong>library</strong> that handles the low-level protocol.</p>
+
+    <div class="editor">
+<span class="cmt">// Browser (JavaScript):</span>
+ctx.<span class="fn">fillStyle</span> = <span class="str">'#6c63ff'</span>;
+ctx.<span class="fn">fillRect</span>(<span class="num">10</span>, <span class="num">10</span>, <span class="num">50</span>, <span class="num">50</span>);
+
+<span class="cmt">// Watch (C++ with Arduino_GFX_Library):</span>
+gfx-><span class="fn">fillScreen</span>(<span class="fn">BLACK</span>);
+gfx-><span class="fn">fillCircle</span>(<span class="num">60</span>, <span class="num">60</span>, <span class="num">30</span>, <span class="fn">gfx</span>-><span class="fn">color565</span>(<span class="num">108</span>, <span class="num">99</span>, <span class="num">255</span>));</div>
+
+    <p>The drawing calls are different, but the concept — tell the screen where and what color — is the same.</p>
+
+    <h2>Pin numbers: where things are connected</h2>
+    <p>Every wire going into a microcontroller connects to a numbered pin. The display connects to pins 10, 11, 12, 13, 14. The touch sensor connects to pins 8 and 9. Your code has to know those numbers — if you get one wrong, the screen won't initialize, and nothing will work.</p>
+
+    <div class="editor">
+<span class="cmt">// These must match the actual hardware wiring:</span>
+<span class="ty">#define</span> LCD_CS   <span class="num">10</span>
+<span class="ty">#define</span> LCD_SCK  <span class="num">12</span>
+<span class="ty">#define</span> LCD_D0   <span class="num">11</span>
+<span class="ty">#define</span> TOUCH_SDA <span class="num">8</span>
+<span class="ty">#define</span> TOUCH_SCL <span class="num">9</span></div>
+
+    <div class="callout warn">
+      <strong>Verify before you build.</strong> Pin numbers vary between hardware revisions. Always check them against the manufacturer's documentation for your specific board before uploading. Wrong pins mean a blank screen — no damage, but nothing works until you fix it.
+    </div>
+
+    <h2>Uploading: from code to chip</h2>
+    <p>When you click Upload in Arduino IDE, four things happen:</p>
+    <ul>
+      <li><strong>Compile</strong> — your C++ is translated into machine instructions the ESP32-S3 can run</li>
+      <li><strong>Link</strong> — the compiler adds library code (like the display driver) to your program</li>
+      <li><strong>Transfer</strong> — the compiled binary is sent over USB to the watch's flash memory</li>
+      <li><strong>Reset</strong> — the watch reboots and runs your program from the beginning</li>
+    </ul>
+    <p>The whole process takes 10–30 seconds. When it's done, the watch runs your code — not inside a browser, not in a simulator, on the actual hardware.</p>
+
+    <button class="ready-btn" onclick="unlockSandbox()">I'm ready — run the simulation →</button>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PART 2 -->
+<section id="tab-sandbox" class="tab-section">
+  <div class="sandbox-wrap">
+
+    <div class="sim-row">
+
+      <!-- Watch -->
+      <div class="watch-bezel">
+        <div class="watch-label">ESP32-S3</div>
+        <div class="watch-screen">
+          <canvas id="wcanvas" width="154" height="154"></canvas>
+        </div>
+        <div class="watch-stats">
+          <div class="ws-row">
+            <span class="ws-label">Food</span>
+            <div class="ws-track"><div class="ws-fill food" id="ws-food" style="width:80%"></div></div>
+          </div>
+          <div class="ws-row">
+            <span class="ws-label">Happy</span>
+            <div class="ws-track"><div class="ws-fill happy" id="ws-happy" style="width:70%"></div></div>
+          </div>
+          <div class="ws-row">
+            <span class="ws-label">Energy</span>
+            <div class="ws-track"><div class="ws-fill energy" id="ws-energy" style="width:50%"></div></div>
+          </div>
+        </div>
+        <div class="watch-btns">
+          <button class="watch-btn" onclick="watchAction('feed')">FEED</button>
+          <button class="watch-btn" onclick="watchAction('pet')">PET</button>
+          <button class="watch-btn" onclick="watchAction('rest')">REST</button>
+        </div>
+        <div class="watch-label">AMOLED 2.06"</div>
+      </div>
+
+      <!-- Code panel -->
+      <div class="code-panel">
+        <div class="code-panel-header">
+          <div class="code-panel-title">
+            <div class="code-dot dot-r"></div>
+            <div class="code-dot dot-y"></div>
+            <div class="code-dot dot-g"></div>
+            <span class="code-filename">star_tama.ino</span>
+          </div>
+          <button class="copy-sketch-btn" id="copy-btn" onclick="copySketch()">Copy sketch</button>
+        </div>
+        <pre><code id="sketch-code"></code></pre>
+      </div>
+
+    </div>
+
+    <!-- ═══ WOKWI SLOT ══════════════════════════════════════════════
+         This section is a community contribution opportunity.
+         Replace this entire .wokwi-slot div with an embedded Wokwi
+         project when it's ready. See the spec block below for details.
+         ════════════════════════════════════════════════════════════ -->
+    <div class="wokwi-slot">
+      <div class="contrib-tag">Community contribution needed</div>
+      <h3>In-browser Wokwi simulation</h3>
+      <p>
+        This slot is reserved for an embedded Wokwi project that lets students
+        run and modify the actual C++ sketch in their browser — no download required.
+        The canvas simulation above shows the logic; Wokwi would show the real compiled code
+        running on a simulated ESP32-S3.
+      </p>
+      <div class="spec-block">
+<span class="spec-cmt">// What goes here:</span>
+<span class="spec-key">target</span>:    <span class="spec-val">ESP32-S3</span>
+<span class="spec-key">display</span>:   <span class="spec-val">ILI9341 (closest Wokwi-supported substitute for CO5300)</span>
+<span class="spec-key">library</span>:   <span class="spec-val">Arduino_GFX_Library</span>
+<span class="spec-key">sketch</span>:    <span class="spec-val">star_tama.ino (copy-sketch button above exports it)</span>
+<span class="spec-key">embed</span>:     <span class="spec-val">&lt;iframe src="https://wokwi.com/projects/[ID]" /&gt;</span>
+<span class="spec-cmt">// Notes:</span>
+<span class="spec-cmt">// - CO5300 via QSPI is not yet in Wokwi's parts library</span>
+<span class="spec-cmt">// - ILI9341 uses the same gfx-&gt;draw* API; only setup() differs</span>
+<span class="spec-cmt">// - The sketch should compile and simulate without modification</span>
+<span class="spec-cmt">// - See: github.com/Emerging-Rule/community for contribution guide</span></div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="lesson-footer">
+  Flash the Watch · Grades 6–8 · Computer Science ·
+  <a href="https://github.com/Emerging-Rule/community" target="_blank" rel="noopener">Emerging Rule Community</a>
+  · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>
+</footer>
+
+<script>
+'use strict';
+
+// ── Watch simulation state ────────────────────────────────────────
+const sim = { food: 80, happy: 70, energy: 50, t: 0, bounce: 0, hearts: [] };
+let activeLines = [];
+
+const wcanvas = document.getElementById('wcanvas');
+const wctx    = wcanvas.getContext('2d');
+const W = wcanvas.width, H = wcanvas.height;
+
+// ── Actions ───────────────────────────────────────────────────────
+function watchAction(a) {
+  if (a === 'feed')  { sim.food   = Math.min(100, sim.food   + 22); sim.bounce = 12; highlightLines('feed'); }
+  if (a === 'pet')   { sim.happy  = Math.min(100, sim.happy  + 18); sim.bounce = 10; spawnHeart(); highlightLines('pet'); }
+  if (a === 'rest')  { sim.energy = Math.min(100, sim.energy + 28); highlightLines('rest'); }
+  updateStatBars();
+}
+
+function spawnHeart() {
+  sim.hearts.push({ x: W/2 + (Math.random()-0.5)*40, y: H/2 - 20, life: 1.0 });
+}
+
+function updateStatBars() {
+  document.getElementById('ws-food').style.width   = sim.food   + '%';
+  document.getElementById('ws-happy').style.width  = sim.happy  + '%';
+  document.getElementById('ws-energy').style.width = sim.energy + '%';
+}
+
+// slow decay
+setInterval(() => {
+  sim.food   = Math.max(0, sim.food   - 0.5);
+  sim.happy  = Math.max(0, sim.happy  - 0.3);
+  sim.energy = Math.max(0, sim.energy - 0.2);
+  updateStatBars();
+}, 8000);
+
+// ── Watch canvas draw ─────────────────────────────────────────────
+function drawWatch() {
+  sim.t += 0.05;
+  if (sim.bounce > 0) sim.bounce--;
+  sim.hearts = sim.hearts.filter(h => h.life > 0.02);
+  sim.hearts.forEach(h => { h.y -= 1; h.life -= 0.035; });
+
+  wctx.fillStyle = '#000';
+  wctx.fillRect(0, 0, W, H);
+
+  const cx = W/2, cy = H/2;
+  const happy   = sim.happy > 65;
+  const sad     = sim.food < 25 || sim.happy < 25;
+  const tired   = sim.energy < 25;
+  const bounceY = sim.bounce > 0 ? -Math.abs(Math.sin(sim.t * 4)) * 7 : 0;
+
+  // subtle bg glow matching mood
+  const glowColor = sad ? '#3a1a1a' : happy ? '#1a2a1a' : '#1a1a2a';
+  wctx.fillStyle = glowColor;
+  wctx.fillRect(0, 0, W, H);
+
+  // body
+  wctx.save();
+  wctx.translate(cx, cy + bounceY);
+
+  const wobble = Math.sin(sim.t * 1.5) * 1.5;
+  wctx.beginPath();
+  wctx.ellipse(0, 0, 38 + wobble, 42 - wobble*0.4, 0, 0, Math.PI*2);
+  wctx.fillStyle = '#7ee8a2';
+  wctx.fill();
+
+  // sheen
+  wctx.beginPath();
+  wctx.ellipse(-9, -11, 12, 9, -0.3, 0, Math.PI*2);
+  wctx.fillStyle = 'rgba(255,255,255,0.2)';
+  wctx.fill();
+
+  // eyes
+  const blinkOpen = (Math.sin(sim.t * 0.3) > -0.95);
+  const eyeH = tired ? 3 : blinkOpen ? 8 : 1.5;
+  [[-14, -6], [14, -6]].forEach(([ex, ey]) => {
+    wctx.beginPath();
+    wctx.ellipse(ex, ey, 7, eyeH, 0, 0, Math.PI*2);
+    wctx.fillStyle = 'white';
+    wctx.fill();
+    if (blinkOpen && !tired) {
+      wctx.beginPath();
+      wctx.arc(ex+1.5, ey+0.5, 4, 0, Math.PI*2);
+      wctx.fillStyle = '#111';
+      wctx.fill();
+      wctx.beginPath();
+      wctx.arc(ex+3, ey-0.5, 1.5, 0, Math.PI*2);
+      wctx.fillStyle = 'white';
+      wctx.fill();
+    }
+  });
+
+  // mouth
+  wctx.beginPath();
+  wctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  wctx.lineWidth = 2;
+  wctx.lineCap = 'round';
+  if (sad)        { wctx.arc(0, 24, 9, Math.PI*1.15, Math.PI*1.85); }
+  else if (happy) { wctx.arc(0, 16, 11, 0.25, Math.PI-0.25); }
+  else            { wctx.moveTo(-8, 20); wctx.lineTo(8, 20); }
+  wctx.stroke();
+
+  wctx.restore();
+
+  // floating hearts
+  sim.hearts.forEach(h => {
+    wctx.save();
+    wctx.globalAlpha = h.life;
+    wctx.font = '12px serif';
+    wctx.textAlign = 'center';
+    wctx.fillText('♥', h.x, h.y);
+    wctx.restore();
+  });
+
+  // tired zzz
+  if (tired) {
+    wctx.save();
+    wctx.globalAlpha = 0.6;
+    wctx.font = 'bold 11px sans-serif';
+    wctx.fillStyle = '#89b4fa';
+    wctx.textAlign = 'center';
+    wctx.fillText('z z', cx + 34, cy - 38 + Math.sin(sim.t)*3);
+    wctx.restore();
+  }
+
+  requestAnimationFrame(drawWatch);
+}
+drawWatch();
+
+// ── Sketch code ───────────────────────────────────────────────────
+const SKETCH = `#include <Arduino_GFX_Library.h>
+#include <Preferences.h>
+
+// ── Pin defines (verify against Waveshare wiki) ──
+#define LCD_CS    10
+#define LCD_SCK   12
+#define LCD_D0    11
+#define LCD_D1    13
+#define LCD_D2     7
+#define LCD_D3    14
+#define TOUCH_SDA  8
+#define TOUCH_SCL  9
+
+Arduino_DataBus *bus = new Arduino_ESP32QSPI(
+  LCD_CS, LCD_SCK, LCD_D0, LCD_D1, LCD_D2, LCD_D3);
+Arduino_GFX *gfx = new Arduino_CO5300(bus, /*rst*/ -1);
+Preferences prefs;
+
+// ── Pet state ────────────────────────────────────
+int food   = 80;
+int happy  = 70;
+int energy = 50;
+unsigned long lastMs = 0;
+
+// ── Setup ────────────────────────────────────────
+void setup() {
+  gfx->begin();
+  gfx->fillScreen(BLACK);
+  prefs.begin("star", false);
+  food   = prefs.getInt("food",   80);
+  happy  = prefs.getInt("happy",  70);
+  energy = prefs.getInt("energy", 50);
+}
+
+// ── Main loop ────────────────────────────────────
+void loop() {
+  unsigned long now = millis();
+  if (now - lastMs > 10000) {      // every 10s
+    food   = max(0, food   - 3);
+    happy  = max(0, happy  - 2);
+    energy = max(0, energy - 1);
+    prefs.putInt("food",   food);
+    prefs.putInt("happy",  happy);
+    prefs.putInt("energy", energy);
+    lastMs = now;
+  }
+  drawPet();
+  handleTouch();
+  delay(16);                       // ~60fps
+}
+
+// ── Feed button ──────────────────────────────────
+void feed() {
+  food  = min(100, food  + 20);
+  happy = min(100, happy +  5);
+}
+
+// ── Pet button ───────────────────────────────────
+void pet() {
+  happy = min(100, happy + 15);
+}
+
+// ── Rest button ──────────────────────────────────
+void rest() {
+  energy = min(100, energy + 25);
+}
+
+// ── Draw ─────────────────────────────────────────
+void drawPet() {
+  gfx->fillScreen(BLACK);
+  // body
+  gfx->fillCircle(77, 77, 38,
+    gfx->color565(126, 232, 162));
+  // eyes, mouth, stats...
+  // (full drawing code in the step-by-step guide)
+}`;
+
+// line ranges for highlight
+const HIGHLIGHT_RANGES = {
+  feed: [42, 45],
+  pet:  [48, 50],
+  rest: [53, 55],
+};
+
+function highlightLines(section) {
+  activeLines = HIGHLIGHT_RANGES[section] || [];
+  renderSketch();
+  setTimeout(() => { activeLines = []; renderSketch(); }, 2500);
+}
+
+function renderSketch() {
+  const el = document.getElementById('sketch-code');
+  const lineArr = SKETCH.split('\n');
+  el.innerHTML = lineArr.map((line, i) => {
+    const lineNum = i + 1;
+    const hl = activeLines.length === 2 && lineNum >= activeLines[0] && lineNum <= activeLines[1];
+    const escaped = line
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/(\/\/.*)/g, '<span class="cmt">$1</span>')
+      .replace(/\b(void|int|bool|unsigned|long|true|false|if|while|new)\b/g, '<span class="kw">$1</span>')
+      .replace(/\b(setup|loop|feed|pet|rest|drawPet|handleTouch|begin|fillScreen|fillCircle|color565|min|max|millis|delay|getInt|putInt)\b/g, '<span class="fn">$1</span>')
+      .replace(/#\w+/g, '<span class="ty">$&</span>')
+      .replace(/\b(\d+)\b/g, '<span class="num">$1</span>')
+      .replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+    return `<span class="code-line${hl ? ' hl' : ''}">${escaped}</span>`;
+  }).join('\n');
+}
+renderSketch();
+
+// ── Copy sketch ───────────────────────────────────────────────────
+function copySketch() {
+  navigator.clipboard.writeText(SKETCH).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy sketch';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  const btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Run It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+<script>
+'use strict';
+
+
+'use strict';
+
+// ── Watch simulation state ────────────────────────────────────────
+const sim = { food: 80, happy: 70, energy: 50, t: 0, bounce: 0, hearts: [] };
+let activeLines = [];
+
+const wcanvas = document.getElementById('wcanvas');
+const wctx    = wcanvas.getContext('2d');
+const W = wcanvas.width, H = wcanvas.height;
+
+// ── Actions ───────────────────────────────────────────────────────
+function watchAction(a) {
+  if (a === 'feed')  { sim.food   = Math.min(100, sim.food   + 22); sim.bounce = 12; highlightLines('feed'); }
+  if (a === 'pet')   { sim.happy  = Math.min(100, sim.happy  + 18); sim.bounce = 10; spawnHeart(); highlightLines('pet'); }
+  if (a === 'rest')  { sim.energy = Math.min(100, sim.energy + 28); highlightLines('rest'); }
+  updateStatBars();
+}
+
+function spawnHeart() {
+  sim.hearts.push({ x: W/2 + (Math.random()-0.5)*40, y: H/2 - 20, life: 1.0 });
+}
+
+function updateStatBars() {
+  document.getElementById('ws-food').style.width   = sim.food   + '%';
+  document.getElementById('ws-happy').style.width  = sim.happy  + '%';
+  document.getElementById('ws-energy').style.width = sim.energy + '%';
+}
+
+// slow decay
+setInterval(() => {
+  sim.food   = Math.max(0, sim.food   - 0.5);
+  sim.happy  = Math.max(0, sim.happy  - 0.3);
+  sim.energy = Math.max(0, sim.energy - 0.2);
+  updateStatBars();
+}, 8000);
+
+// ── Watch canvas draw ─────────────────────────────────────────────
+function drawWatch() {
+  sim.t += 0.05;
+  if (sim.bounce > 0) sim.bounce--;
+  sim.hearts = sim.hearts.filter(h => h.life > 0.02);
+  sim.hearts.forEach(h => { h.y -= 1; h.life -= 0.035; });
+
+  wctx.fillStyle = '#000';
+  wctx.fillRect(0, 0, W, H);
+
+  const cx = W/2, cy = H/2;
+  const happy   = sim.happy > 65;
+  const sad     = sim.food < 25 || sim.happy < 25;
+  const tired   = sim.energy < 25;
+  const bounceY = sim.bounce > 0 ? -Math.abs(Math.sin(sim.t * 4)) * 7 : 0;
+
+  // subtle bg glow matching mood
+  const glowColor = sad ? '#3a1a1a' : happy ? '#1a2a1a' : '#1a1a2a';
+  wctx.fillStyle = glowColor;
+  wctx.fillRect(0, 0, W, H);
+
+  // body
+  wctx.save();
+  wctx.translate(cx, cy + bounceY);
+
+  const wobble = Math.sin(sim.t * 1.5) * 1.5;
+  wctx.beginPath();
+  wctx.ellipse(0, 0, 38 + wobble, 42 - wobble*0.4, 0, 0, Math.PI*2);
+  wctx.fillStyle = '#7ee8a2';
+  wctx.fill();
+
+  // sheen
+  wctx.beginPath();
+  wctx.ellipse(-9, -11, 12, 9, -0.3, 0, Math.PI*2);
+  wctx.fillStyle = 'rgba(255,255,255,0.2)';
+  wctx.fill();
+
+  // eyes
+  const blinkOpen = (Math.sin(sim.t * 0.3) > -0.95);
+  const eyeH = tired ? 3 : blinkOpen ? 8 : 1.5;
+  [[-14, -6], [14, -6]].forEach(([ex, ey]) => {
+    wctx.beginPath();
+    wctx.ellipse(ex, ey, 7, eyeH, 0, 0, Math.PI*2);
+    wctx.fillStyle = 'white';
+    wctx.fill();
+    if (blinkOpen && !tired) {
+      wctx.beginPath();
+      wctx.arc(ex+1.5, ey+0.5, 4, 0, Math.PI*2);
+      wctx.fillStyle = '#111';
+      wctx.fill();
+      wctx.beginPath();
+      wctx.arc(ex+3, ey-0.5, 1.5, 0, Math.PI*2);
+      wctx.fillStyle = 'white';
+      wctx.fill();
+    }
+  });
+
+  // mouth
+  wctx.beginPath();
+  wctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  wctx.lineWidth = 2;
+  wctx.lineCap = 'round';
+  if (sad)        { wctx.arc(0, 24, 9, Math.PI*1.15, Math.PI*1.85); }
+  else if (happy) { wctx.arc(0, 16, 11, 0.25, Math.PI-0.25); }
+  else            { wctx.moveTo(-8, 20); wctx.lineTo(8, 20); }
+  wctx.stroke();
+
+  wctx.restore();
+
+  // floating hearts
+  sim.hearts.forEach(h => {
+    wctx.save();
+    wctx.globalAlpha = h.life;
+    wctx.font = '12px serif';
+    wctx.textAlign = 'center';
+    wctx.fillText('♥', h.x, h.y);
+    wctx.restore();
+  });
+
+  // tired zzz
+  if (tired) {
+    wctx.save();
+    wctx.globalAlpha = 0.6;
+    wctx.font = 'bold 11px sans-serif';
+    wctx.fillStyle = '#89b4fa';
+    wctx.textAlign = 'center';
+    wctx.fillText('z z', cx + 34, cy - 38 + Math.sin(sim.t)*3);
+    wctx.restore();
+  }
+
+  requestAnimationFrame(drawWatch);
+}
+drawWatch();
+
+// ── Sketch code ───────────────────────────────────────────────────
+const SKETCH = `#include <Arduino_GFX_Library.h>
+#include <Preferences.h>
+
+// ── Pin defines (verify against Waveshare wiki) ──
+#define LCD_CS    10
+#define LCD_SCK   12
+#define LCD_D0    11
+#define LCD_D1    13
+#define LCD_D2     7
+#define LCD_D3    14
+#define TOUCH_SDA  8
+#define TOUCH_SCL  9
+
+Arduino_DataBus *bus = new Arduino_ESP32QSPI(
+  LCD_CS, LCD_SCK, LCD_D0, LCD_D1, LCD_D2, LCD_D3);
+Arduino_GFX *gfx = new Arduino_CO5300(bus, /*rst*/ -1);
+Preferences prefs;
+
+// ── Pet state ────────────────────────────────────
+int food   = 80;
+int happy  = 70;
+int energy = 50;
+unsigned long lastMs = 0;
+
+// ── Setup ────────────────────────────────────────
+void setup() {
+  gfx->begin();
+  gfx->fillScreen(BLACK);
+  prefs.begin("star", false);
+  food   = prefs.getInt("food",   80);
+  happy  = prefs.getInt("happy",  70);
+  energy = prefs.getInt("energy", 50);
+}
+
+// ── Main loop ────────────────────────────────────
+void loop() {
+  unsigned long now = millis();
+  if (now - lastMs > 10000) {      // every 10s
+    food   = max(0, food   - 3);
+    happy  = max(0, happy  - 2);
+    energy = max(0, energy - 1);
+    prefs.putInt("food",   food);
+    prefs.putInt("happy",  happy);
+    prefs.putInt("energy", energy);
+    lastMs = now;
+  }
+  drawPet();
+  handleTouch();
+  delay(16);                       // ~60fps
+}
+
+// ── Feed button ──────────────────────────────────
+void feed() {
+  food  = min(100, food  + 20);
+  happy = min(100, happy +  5);
+}
+
+// ── Pet button ───────────────────────────────────
+void pet() {
+  happy = min(100, happy + 15);
+}
+
+// ── Rest button ──────────────────────────────────
+void rest() {
+  energy = min(100, energy + 25);
+}
+
+// ── Draw ─────────────────────────────────────────
+void drawPet() {
+  gfx->fillScreen(BLACK);
+  // body
+  gfx->fillCircle(77, 77, 38,
+    gfx->color565(126, 232, 162));
+  // eyes, mouth, stats...
+  // (full drawing code in the step-by-step guide)
+}`;
+
+// line ranges for highlight
+const HIGHLIGHT_RANGES = {
+  feed: [42, 45],
+  pet:  [48, 50],
+  rest: [53, 55],
+};
+
+function highlightLines(section) {
+  activeLines = HIGHLIGHT_RANGES[section] || [];
+  renderSketch();
+  setTimeout(() => { activeLines = []; renderSketch(); }, 2500);
+}
+
+function renderSketch() {
+  const el = document.getElementById('sketch-code');
+  const lineArr = SKETCH.split('\n');
+  el.innerHTML = lineArr.map((line, i) => {
+    const lineNum = i + 1;
+    const hl = activeLines.length === 2 && lineNum >= activeLines[0] && lineNum <= activeLines[1];
+    const escaped = line
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/(\/\/.*)/g, '<span class="cmt">$1</span>')
+      .replace(/\b(void|int|bool|unsigned|long|true|false|if|while|new)\b/g, '<span class="kw">$1</span>')
+      .replace(/\b(setup|loop|feed|pet|rest|drawPet|handleTouch|begin|fillScreen|fillCircle|color565|min|max|millis|delay|getInt|putInt)\b/g, '<span class="fn">$1</span>')
+      .replace(/#\w+/g, '<span class="ty">$&</span>')
+      .replace(/\b(\d+)\b/g, '<span class="num">$1</span>')
+      .replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+    return `<span class="code-line${hl ? ' hl' : ''}">${escaped}</span>`;
+  }).join('\n');
+}
+renderSketch();
+
+// ── Copy sketch ───────────────────────────────────────────────────
+function copySketch() {
+  navigator.clipboard.writeText(SKETCH).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy sketch';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ── Tab switching ─────────────────────────────────────────────────
+function switchTab(id, btn) {
+  if (btn.classList.contains('locked')) return;
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function unlockSandbox() {
+  const btn = document.getElementById('tab-btn-sandbox');
+  btn.classList.remove('locked');
+  btn.textContent = 'Part 2 — Run It';
+  switchTab('sandbox', btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+function paintCreature(g, o) {
+  var col = o.color || '#7c4dff';
+  var mood = o.mood || 'neutral';   // happy | sad | tired | neutral
+  var t = o.t || 0;
+  g.save();
+  g.translate(o.x, o.y);
+  var s = o.scale || 1; g.scale(s, s);
+
+  var wobble = Math.sin(t * 1.4) * 2;
+
+  // body
+  g.beginPath();
+  g.ellipse(0, 0, 52 + wobble, 58 - wobble * 0.5, 0, 0, Math.PI * 2);
+  g.fillStyle = col; g.fill();
+
+  // belly
+  g.beginPath();
+  g.ellipse(0, 16, 30, 26, 0, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(255,255,255,0.16)'; g.fill();
+
+  // sheen
+  g.beginPath();
+  g.ellipse(-12, -16, 16, 12, -0.3, 0, Math.PI * 2);
+  g.fillStyle = 'rgba(255,255,255,0.22)'; g.fill();
+
+  // sad cheeks (tear-shadow)
+  if (mood === 'sad') {
+    [[-22, 10], [22, 10]].forEach(function(pt) {
+      g.beginPath(); g.ellipse(pt[0], pt[1], 11, 7, 0, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(0,0,0,0.12)'; g.fill();
+    });
+  }
+  // happy blush
+  if (mood === 'happy') {
+    [[-24, 8], [24, 8]].forEach(function(pt) {
+      g.beginPath(); g.ellipse(pt[0], pt[1], 9, 6, 0, 0, Math.PI * 2);
+      g.fillStyle = 'rgba(255,93,143,0.45)'; g.fill();
+    });
+  }
+
+  // eyes
+  var eyeY = -8;
+  var droopy = (mood === 'sad' || mood === 'tired');
+  var fullH = droopy ? 3 : 10;
+  var eyeH = o.blink ? 1.5 : fullH;
+  [[-18, eyeY], [18, eyeY]].forEach(function(pt) {
+    var ex = pt[0], ey = pt[1];
+    g.beginPath(); g.ellipse(ex, ey, 10, eyeH, 0, 0, Math.PI * 2);
+    g.fillStyle = 'white'; g.fill();
+    if (eyeH > 3) {
+      g.beginPath(); g.arc(ex + 2, ey + 1, 5, 0, Math.PI * 2);
+      g.fillStyle = '#231c3a'; g.fill();
+      g.beginPath(); g.arc(ex + 4, ey - 1, 2, 0, Math.PI * 2);
+      g.fillStyle = 'white'; g.fill();
+    }
+  });
+
+  // mouth
+  g.beginPath();
+  g.strokeStyle = 'rgba(0,0,0,0.32)';
+  g.lineWidth = 2.5; g.lineCap = 'round';
+  if (mood === 'sad') {
+    g.arc(0, 30, 12, Math.PI * 1.1, Math.PI * 1.9);
+  } else if (mood === 'happy') {
+    g.arc(0, 14, 14, 0.2, Math.PI - 0.2);
+  } else {
+    g.moveTo(-9, 22); g.lineTo(9, 22);
+  }
+  g.stroke();
+
+  g.restore();
+}
+
+/* ═══════════════ blink scheduler (shared) ═══════════════ */
+var blinking = 0, blinkCd = 90;
+function tickBlink() {
+  if (blinking > 0) { blinking--; }
+  else { blinkCd--; if (blinkCd <= 0) { blinking = 7; blinkCd = 130 + Math.floor(Math.random() * 200); } }
+}
+
+/* ═══════════════ header mascot ═══════════════ */
+(function mascot() {
+  var cv = document.getElementById('mascot');
+  if (!cv) return;
+  var g = cv.getContext('2d');
+  var W = cv.width, H = cv.height, mt = 0;
+  cv.addEventListener('click', function() { hop = 10; });
+  var hop = 0;
+  function loop() {
+    mt += 0.04; tickBlink();
+    if (hop > 0) hop -= 0.5;
+    g.clearRect(0, 0, W, H);
+    var bob = Math.sin(mt * 1.7) * 4 - (hop > 0 ? Math.sin((10 - hop) / 10 * Math.PI) * 16 : 0);
+    paintCreature(g, { x: W / 2, y: H / 2 + 14 + bob, scale: 0.72, mood: 'happy', t: mt, blink: blinking > 0, color: '#7c4dff' });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ═══════════════ emoji map ═══════════════ */
+var EMOJIS = [
+  '⭐','🍎','🍕','🍩','🎂','🍓','🥕','🌮',
+  '✨','💛','💜','❤️','💚','💙','🧡','🤍',
+  '💤','💫','🎵','🎉','🎈','🎁','🌈','☀️',
+  '🐾','🐟','🦋','🌸','🍄','🌙','⚡','🔥',
+  '😊','😴','🥺','😎','🤩','🥳','😋','🤔'
+];
+
+</script>
+</body>
+</html>
